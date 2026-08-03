@@ -273,7 +273,7 @@ springdoc:
   group-configs:
     - group: 'default'
       paths-to-match: '/**'
-      packages-to-scan: com.jz.jzbancked.controller
+      packages-to-scan: com.xx.xxxxx.controller
 
 knife4j:
   enable: true
