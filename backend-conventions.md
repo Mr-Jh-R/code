@@ -317,7 +317,7 @@ public enum XxxEnum {
 
 ---
 
-## 十、MySQL 建表规范
+## 十、MySQL 建表规范(存在或使用MySQL是才遵循)
 
 > 以下规范适用于 MySQL，其他数据库（如 PostgreSQL）语法不同，不适用。
 
