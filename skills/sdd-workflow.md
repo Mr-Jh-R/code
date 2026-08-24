@@ -1,449 +1,182 @@
 ---
 name: sdd-workflow
-description: SDD（规范驱动开发）完整工作流 Skill，整合 OpenSpec + Superpowers + Claude Code 三件套。当用户要开始新功能、修复 bug、变更数据库 Schema、设计 API 接口，或说"开始做 XXX"、"我想实现 XXX"、"如何开发 XXX"时，必须使用本 Skill。包含需求探索(grill-me)、规范制定、Superpowers 四步纪律、TDD 实现、系统化调试、验证闭环、三层持久化等完整流程。
+description: Use when starting new features, substantial bug fixes, API or database schema changes, cross-module work, or when the user asks to follow SDD, OpenSpec, or the project development workflow in Codex, Claude Code, or another AI coding tool.
 ---
 
-## 配套规范文件
+# SDD 工作流
 
-> 将以下文件复制到项目后，在 CLAUDE.md 中引用路径，AI 每次对话自动加载。
+本 Skill 定义与 AI 工具无关的开发流程。OpenSpec 保存“做什么”和进度；当前 AI 工具负责探索、计划、实现、调试、审查和验证。Claude Code 与 Codex 的调用名称可以不同，但产出物和完成标准相同。
 
-| 文件 | 说明 |
-|------|------|
-| `conventions/frontend-conventions.md` | 前端规范：API 自动生成、组件优先级、类型命名 |
-| `conventions/backend-conventions.md` | 后端规范：分层架构、响应体、异常体系、权限注解 |
+## 开始前
 
----
+1. 读取项目级说明，例如 `AGENTS.md`、`CLAUDE.md`、README 和目标目录附近的约束文件。
+2. 检查 `openspec/`、现有 change、当前分支、工作区状态和项目验证命令。
+3. 识别技术栈和包管理器，不擅自替换项目已有工具。
+4. 需要前端规范时，先读取 `docs/conventions/frontend-conventions.md`：
+   - React、Next.js（React）、React + Vite 只读取 `frontend-conventions-react.md`；
+   - Vue 3、Vue Router、Pinia、Nuxt（Vue）、Vue + Vite 只读取 `frontend-conventions-vue.md`；
+   - monorepo 按目标包分别选择，不能混用两份规范。
+5. 版本以项目 `package.json`、lockfile、workspace 和 peer dependency 约束为准。新项目使用当前稳定、兼容、推荐版本，不把本 Skill 中的示例版本当作永久要求。
 
-## 三件套分工
+## 能力映射
 
-| 工具 | 职责 | 核心价值 |
-|------|------|---------|
-| **OpenSpec** | 管"写什么" | 规范的单一真相源，提案-审查-实施-归档 |
-| **Superpowers** | 管"怎么做" | AI 执行的纪律警察，强制四步流程 |
-| **Claude Code** | 管"谁来跑" | SDD 的最佳执行引擎 |
+优先使用当前环境已经提供的能力；不存在完全同名能力时，执行相同的步骤，不要虚构命令。
 
-**核心理念：Action Not Phases**——每个操作是独立能力，不是必须按顺序完成的阶段。大特性走完整流程，小修复可直接 propose，这不是"违规"而是灵活组合能力。
+| 目标 | Claude Code 常见能力 | Codex 常见能力 | 无插件时 |
+| --- | --- | --- | --- |
+| 探索需求 | Superpowers brainstorming | `brainstorming` / 对话探索 | 阅读代码后逐项澄清 |
+| 制定变更 | OpenSpec 命令或 Skill | `openspec-propose` / OpenSpec CLI | 创建 proposal、design、specs、tasks |
+| 实现 | Superpowers TDD / executing plans | `openspec-apply-change`、`test-driven-development` | 按 tasks 逐项 TDD |
+| 调试 | systematic debugging | `systematic-debugging` | 复现、假设、实验、根因、修复 |
+| 验证 | verification before completion | `openspec-verify-change`、`verification-before-completion` | 运行项目验证命令并核对 specs |
+| 归档 | OpenSpec archive | `openspec-archive-change` | `openspec archive <change-name>` |
 
----
+能力名称只是提示。实际执行前必须先确认当前环境是否存在该 Skill、插件或命令。
 
-## 安装
+## 选择流程
+
+根据修改范围选择足够但不过度的流程：
+
+- 新功能、跨模块修改、API/数据库变更：完整执行探索、提案、实现、验证、归档。
+- 边界清晰的中型修改：可简化探索，但必须有 OpenSpec change、tasks 和验证。
+- 小型格式、文案或局部低风险修复：可不创建 OpenSpec change，但仍须读取项目约束并运行适用验证。
+- 难以稳定复现的 bug：先系统化调试；未定位根因前不进入大范围修改。
+
+不要为了完成流程而制造无价值文档，也不要以“小改动”为理由跳过必要验证。
+
+## 阶段一：探索
+
+适用于需求存在歧义、边界不清或有多个合理方案的情况。
+
+1. 阅读相关代码、历史变更和现有 specs。
+2. 明确目标、用户场景、范围外内容、异常路径和兼容性要求。
+3. 对关键设计给出可比较的方案和取舍。
+4. 记录已确认决策及被否决方案，避免后续重复讨论。
+5. 未获得必要决策时，不假设会显著改变行为或范围的答案。
+
+产出可以写入 proposal/design，也可以先形成简短探索文档；最终必须进入 OpenSpec change。
+
+## 阶段二：创建或继续 OpenSpec Change
+
+先检查现有 change：
 
 ```bash
-# 安装 Superpowers（在 Claude Code 会话中执行）
-/plugin marketplace add obra/superpowers-marketplace
-/plugin install superpowers@superpowers-marketplace
-
-# 安装 OpenSpec CLI
-npm install -g @fission-ai/openspec@latest
-
-# 在项目根目录初始化 OpenSpec
-openspec init
+openspec list
 ```
 
----
-
-## Superpowers 强制四步流程
-
-Superpowers 的核心是强制 AI 遵守四步纪律，防止"Vibe Coding"：
-
-### Step 1：Brainstorm（头脑风暴）
-
-**触发方式：**
-```
-我想做 [功能描述]，请先 brainstorm
-```
-
-**AI 执行流程：**
-1. 探索项目结构，理解现有架构和约束
-2. **一次只问一个问题**，逐步澄清需求：
-   - 功能边界：哪些在范围内，哪些明确不做？
-   - 用户场景：谁在什么情况下使用？
-   - 异常处理：错误如何处理？幂等性如何保证？
-   - 性能约束：并发量、响应时间要求？
-3. 提出 2-3 种技术方案，列出对比
-4. **分段展示设计，逐段确认**（不一次性输出所有内容）
-5. 将达成共识的设计写入 `docs/specs/[feature-name].md` 并 commit
-
-**产出物模板：**
-```markdown
-# 功能探索：[功能名称]
-
-## 需求澄清
-- 核心目标：
-- 用户角色：
-- In Scope：
-- Out of Scope（明确不做）：
-
-## 边界条件
-- 异常场景：
-- 幂等性处理：
-- 并发约束：
-
-## 方案对比
-| 方案 | 优点 | 缺点 | 推荐 |
-|------|------|------|------|
-| 方案 A | | | |
-| 方案 B | | | |
-
-## 结论
-采用方案 X，理由：
-```
-
-> **为什么不跳过？** Brainstorm 是整个流程 ROI 最高的环节。30 分钟澄清边界，远比编码后返工划算——返工成本至少翻三倍。
-
----
-
-### Step 2：Git Worktree（工作区隔离）
-
-**触发方式：**
-```
-开始实现 [change-name]
-```
-
-Superpowers 自动执行：
-1. 创建 `.worktrees/[change-name]` 隔离工作区
-2. 新建 `feature/[change-name]` 分支
-3. 运行依赖安装
-4. 验证测试基线通过
-
-**为什么要隔离？** 主工作区保持干净，多个功能可以并行开发互不干扰。分支名 = OpenSpec change name，保持一致。
-
----
-
-### Step 3：Write a Plan（规范制定）
+如果已有同一目标的 change，继续它，不要创建重复 change。新建 change 时优先使用环境提供的 OpenSpec Skill。CLI 会演进，先运行 `openspec --help`；当前 CLI 可使用：
 
 ```bash
-openspec propose [change-name]
-# 例：openspec propose add-user-login-api
+openspec new change <change-name>
+openspec status --change <change-name>
+openspec instructions <artifact> --change <change-name>
 ```
 
-**自动生成三个文件：**
+至少维护以下产出：
 
-**`proposal.md`（为什么做）**
-```markdown
-# Proposal: [change-name]
+- `proposal.md`：背景、目标、非目标和影响范围；
+- `design.md`：技术方案、关键决策、替代方案、迁移和风险；
+- `specs/`：可验证的行为场景；
+- `tasks.md`：按依赖顺序拆分且带验收条件的任务。
 
-## Why
-[业务背景和痛点]
+开始实现前检查：
 
-## Goals
-- [ ] 目标 1（可验证）
-- [ ] 目标 2
+- 每项需求都有对应场景；
+- API、数据模型、权限、错误处理和兼容性已明确；
+- tasks 覆盖实现、测试、文档、迁移和验证；
+- 计划没有写死与项目无关的依赖版本。
 
-## Non-Goals
-- 不支持 X（本次范围外）
+## 阶段三：隔离工作区
 
-## Impact
-- 模块 A：变更说明
-- 数据库：新增/修改哪些表
-```
+遵循仓库现有分支与 worktree 规则。工作区有用户未提交修改时必须保留，不得重置或覆盖。
 
-**`design.md`（怎么做）**
-```markdown
-# Design: [change-name]
+大型或并行变更优先使用独立分支/worktree；很小的修改可在当前分支完成，但仍需检查工作区状态。分支名尽量与 OpenSpec change name 对应。
 
-## 技术方案
-[选择的方案及理由]
+## 阶段四：TDD 实现
 
-## 替代方案
-[被否决的方案及原因——防止 AI 在第 50 轮对话中重新提出]
+按 `tasks.md` 的依赖顺序逐项执行：
 
-## 接口设计
-[API 定义、数据结构]
-```
+1. 读取当前任务、design 和对应 specs。
+2. 先新增或调整测试，确认测试因缺少目标行为而失败。
+3. 编写使测试通过的最小实现。
+4. 在测试保持通过的前提下重构。
+5. 运行当前模块的格式化、lint、类型检查和测试。
+6. 只有任务及其验证完成后，才把 checkbox 改为 `[x]`。
 
-**`tasks.md`（做什么，checkbox 就是进度）**
-```markdown
-# Tasks: [change-name]
+测试至少覆盖正常路径、边界条件和关键错误路径。生成代码只通过生成器更新，不直接编辑会被覆盖的文件。
 
-- [ ] 任务 1：描述（含验收标准）
-- [ ] 任务 2：描述
-- [ ] 编写单元测试
-- [ ] 更新 API 文档
-```
+## 阶段五：系统化调试
 
-**Scenario 格式（`specs/` 目录，GIVEN/WHEN/THEN 确保可验证）：**
-```markdown
-### Scenario: [场景名称]
-- GIVEN [前置条件]
-- WHEN [触发动作]
-- THEN [期望结果]
-- AND [附加断言]
-```
+遇到 bug 或意外失败时：
 
----
+1. 建立稳定复现步骤，并记录期望与实际结果。
+2. 收集错误日志、调用链、输入输出、环境差异和近期变更。
+3. 提出少量可证伪的根因假设。
+4. 用最小实验逐个验证，不同时修改多个不相关因素。
+5. 确认根因后先补回归测试，再做最小修复。
+6. 运行相关测试和更广范围的回归验证。
 
-### Step 4：Execute（TDD 实现）
+不得把隐藏错误、增加无界重试或扩大超时当作根因修复。
+
+## 阶段六：审查与验证
+
+先核对实现与 specs，再审查代码质量。重点检查：
+
+- 所有 Scenario 是否实现，是否存在未说明的行为变化；
+- 数据库/API 兼容性、权限、错误处理和迁移是否完整；
+- 是否遵守目标技术栈规范，React/Vue 规范是否选对；
+- 是否引入不必要依赖、重复实现或越界重构；
+- tests 是否真正覆盖新行为和回归风险。
+
+运行仓库实际提供的命令。下面只是常见示例，不是固定命令：
 
 ```bash
-openspec apply [change-name]
-# 或在对话中：请按 TDD 方式实现 tasks.md 中的任务
-```
-
-**实现模式 A：Subagent-Driven（大功能推荐）**
-1. 主 Agent 读取 tasks.md，提取每个任务
-2. 派发 Subagent 实现任务（TDD：写测试 → 红 → 实现 → 绿 → 重构）
-3. 派发 Spec Reviewer 检查是否符合 design.md
-4. 派发 Code Reviewer 检查代码质量
-5. tasks.md 对应任务打勾 `[x]`
-6. 循环直到全部完成
-
-**实现模式 B：直接执行（小功能）**
-AI 在当前会话中逐任务实现，每完成一个打勾。
-
-#### TDD 铁律
-
-```
-写测试（红） → 实现代码（绿） → 重构（优化）
-```
-
-AI **必须先写测试，确认测试方案后再实现**。测试覆盖：
-- 正常路径（Happy Path）
-- 边界条件（Edge Cases）
-- 错误路径（Error Cases）
-
-**测试模板（JS/TS）：**
-```typescript
-import { describe, it, expect } from 'vitest'
-
-describe('[模块名]', () => {
-  it('正常路径：should ...', async () => {
-    // Arrange
-    // Act
-    // Assert
-  })
-  it('边界条件：should handle ...', async () => {})
-  it('错误路径：should throw when ...', async () => {})
-})
-```
-
-**测试模板（Java/JUnit）：**
-```java
-class ServiceTest {
-    @Test
-    void shouldReturnSuccessWhenValidInput() {
-        // Given / When / Then
-    }
-    @Test
-    void shouldThrowExceptionWhenInvalidInput() {}
-}
-```
-
----
-
-## 验证与归档
-
-### 验证（三维度检查）
-
-```bash
-openspec verify [change-name]   # 完整性 × 正确性 × 一致性
-```
-
-验证通过后，Superpowers 接管收尾：
-- 自动运行全量测试
-- 提供四个选项：合并 / 创建 PR / 保留分支 / 丢弃
-- 清理 worktree
-
-**声称"完成"前必须执行的验证命令（按项目填写）：**
-```bash
-# 前端
-pnpm typecheck && pnpm test && pnpm lint
-
-# 后端（Java）
+pnpm format:check
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
 mvn test
-
-# 后端（Go）
-go test ./...
-
-# OpenSpec 验证
-openspec verify [change-name]
+openspec validate <change-name> --strict
 ```
 
-**不允许声称完成的场景：**
-- 未运行测试
-- 未检查类型错误
-- 未对照 specs 验证场景覆盖
+`openspec validate` 只验证 change/spec 产物，不证明实现符合设计。还必须使用当前环境提供的 `openspec-verify-change` 等实现验证能力，或人工逐项核对实现、tasks 和所有 Scenario。
 
-### 归档
+声称“完成”“修复”或“测试通过”前，必须报告刚刚执行的命令和结果。无法运行的检查要明确说明原因和剩余风险。
+
+## 阶段七：归档
+
+满足以下条件后才能归档：
+
+- tasks 全部完成；
+- specs 与实现一致；
+- 必要测试、lint、类型检查和构建通过；
+- 数据迁移、文档和兼容性说明已完成；
+- 没有未解释的验证失败。
+
+优先使用环境提供的归档能力，否则按项目支持的 CLI 执行：
 
 ```bash
-openspec archive [change-name]
+openspec archive <change-name>
 ```
 
-变更目录自动移入 `openspec/changes/archive/[date]-[name]/`，Delta Spec 合并回主规范库。任何人（包括未来的 AI）都能追溯：当初为什么这样设计、做了哪些技术选型、考虑了哪些替代方案。
+归档后检查主 specs 是否已同步，以及 git diff 是否只包含预期文件。
 
----
+## 中断恢复
 
-## 三层持久化（AI 不会"失忆"）
+恢复工作时不要依赖旧对话记忆：
 
-AI 有两个致命限制：上下文窗口有限（长对话后忘记前期约束）、会话不持久（关窗口 = 归零）。SDD 通过三层持久化解决：
+1. 读取项目说明和本 Skill；
+2. 查看 `openspec list`、change 的 proposal/design/specs/tasks；
+3. 查看当前分支、`git status` 和最近提交；
+4. 从第一个未完成 task 继续，并重新运行与该任务相关的验证。
 
-| 层级 | 载体 | 内容 |
-|------|------|------|
-| **第 1 层：项目级** | `CLAUDE.md` + `openspec/config.yaml` | 每次新对话自动读取，相当于"置顶备忘录" |
-| **第 2 层：功能级** | `openspec/changes/[name]/` | proposal（为什么做）、design（怎么组织）、tasks（做到哪了）|
-| **第 3 层：代码级** | git worktree + branch | 分支名=功能名，commit 历史=实现进度 |
+## 完成输出
 
-**中断后恢复：**
-```bash
-openspec list                          # 查看当前变更状态
-openspec continue [change-name]        # 从未完成任务继续
-```
+最终结果应简洁包含：
 
-任意步骤之间可以安全 `/clear`，状态在文件系统中，不在对话历史里。
-
----
-
-## 系统化调试
-
-**遇到 bug 时，先分析根因，再提解决方案。**
-
-**触发方式：**
-```
-遇到这个 bug：[描述]，请系统化分析根因，不要直接给解决方案
-```
-
-**七步调试流程：**
-1. **重现问题**：确认 bug 可以稳定复现
-2. **收集信息**：查看错误日志、最近 git 变更（`git log --oneline -10`、`git diff HEAD~1`）
-3. **形成假设**：列出 2-3 个可能根因
-4. **验证假设**：用最小测试用例逐一验证
-5. **定位根因**：确认真正的问题所在
-6. **修复**：只修改必要的代码
-7. **验证修复**：确认测试通过，无副作用
-
-**常见问题排查：**
-
-| 问题类型 | 排查方向 |
-|---------|---------|
-| 数据库字段不存在 | Schema 变更是否已生成迁移并应用？ |
-| 认证失败 | Token/Cookie 是否正确传递？ |
-| 前后端数据不一致 | 接口响应格式与文档是否匹配？ |
-| 环境变量缺失 | `.env.local` 是否配置正确？ |
-| 依赖服务连接失败 | 服务是否启动、端口是否正确？ |
-
----
-
-## 代码审查 Checklist
-
-**触发方式：**
-```
-请审查这段代码，对照 [design.md路径] 检查是否符合设计规范
-```
-
-**四维度审查：**
-1. **正确性**：是否实现了 specs 定义的所有 Scenario？
-2. **完整性**：是否覆盖了所有边界条件？
-3. **一致性**：是否符合项目编码规范？
-4. **安全性**：是否有权限校验？数据是否验证？
-
-**通用 Checklist：**
-- [ ] 是否有对应的测试用例？
-- [ ] 错误是否有统一处理？
-- [ ] 是否有遗漏的异常场景？
-- [ ] 是否符合项目包管理器规范（不混用）？
-- [ ] 数据库操作是否通过正确的抽象层？
-- [ ] 涉及权限的接口是否有鉴权？
-- [ ] 外部调用是否有超时控制？
-- [ ] 涉及数据库变更的是否已生成并应用迁移？
-
----
-
-## 完整工作流示例
-
-以"添加用户头像上传功能"为例：
-
-```
-# Step 1: 需求探索（需求清晰可跳过）
-对话："我想做用户头像上传，请先 brainstorm"
-→ AI 逐一提问澄清边界，输出方案对比
-
-# Step 2: 规范制定
-openspec propose add-user-avatar-upload
-→ 自动生成 proposal.md / design.md / tasks.md
-
-# Step 3: 工作区隔离（对话触发）
-对话："开始实现 add-user-avatar-upload"
-→ Superpowers 自动创建 worktree + 分支
-
-# Step 4: TDD 实现
-openspec apply add-user-avatar-upload
-→ 主 Agent 派发子 Agent，TDD 逐任务实现，tasks.md 打勾
-
-# Step 5: 数据库变更（如涉及）
-# 按项目迁移工具执行（Drizzle / Flyway 等）
-
-# Step 6: 验证
-openspec verify add-user-avatar-upload
-pnpm typecheck && pnpm test   # 按项目调整命令
-
-# Step 7: 归档
-openspec archive add-user-avatar-upload
-```
-
----
-
-## CLAUDE.md 配置模板
-
-新项目使用本 Skill 时，在 `CLAUDE.md` 中添加：
-
-```markdown
-## AI 开发工作流（SDD）
-
-本项目采用规范驱动开发（SDD），三件套：OpenSpec + Superpowers + Claude Code。
-
-### 技术栈（按项目填写）
-- 语言/框架：___________
-- 包管理器：___________
-- 数据库迁移工具：___________
-- 测试框架：___________
-
-### Skill 文件
-- 工作流：`.claude/skills/sdd-workflow.md`
-- 前端规范：`docs/conventions/frontend-conventions.md`
-- 后端规范：`docs/conventions/backend-conventions.md`
-
-### 四步原则
-1. **先 Brainstorm**：需求不清晰时，一次只问一个问题，逐步澄清
-2. **先 Propose**：用 openspec propose 生成 proposal/design/tasks
-3. **先写测试**：TDD 铁律，实现前先写测试
-4. **验证再完成**：测试通过、类型检查通过才能声称完成
-
-### 分支命名
-- 功能分支：feature/[openspec-change-name]
-- 修复分支：fix/[问题描述]
-- 分支名与 OpenSpec change name 保持一致
-```
-
----
-
-## 在新项目中安装
-
-```bash
-# 1. 克隆 skill 仓库
-git clone https://github.com/Mr-Jh-R/code.git sdd-skills
-
-# 2. 复制文件到项目
-mkdir -p .claude/skills docs/conventions
-cp sdd-skills/skills/sdd-workflow.md .claude/skills/
-cp sdd-skills/conventions/frontend-conventions.md docs/conventions/
-cp sdd-skills/conventions/backend-conventions.md docs/conventions/
-
-# 3. 安装工具
-npm install -g @fission-ai/openspec@latest
-openspec init
-
-# 4. 在 Claude Code 中安装 Superpowers
-/plugin marketplace add obra/superpowers-marketplace
-/plugin install superpowers@superpowers-marketplace
-
-# 5. 在项目 CLAUDE.md 中按上方模板配置
-```
-
----
-
-## 参考资料
-
-- [mattpocock/skills](https://github.com/mattpocock/skills) — 工程师技能库（grill-me、tdd、diagnosing-bugs 等原版技能）
-- [Superpowers Plugin](https://github.com/obra/superpowers) — Claude Code 执行纪律插件
-- OpenSpec 文档：`openspec --help`
+- 完成了哪些行为变化；
+- 主要修改文件或模块；
+- 实际运行的验证命令及结果；
+- 尚未完成或无法验证的事项；
+- 如已提交或推送，提供分支和提交信息。

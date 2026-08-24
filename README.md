@@ -1,232 +1,208 @@
-# SDD 工作流 Skill 包
+# SDD 工作流与前端规范
 
-> **Claude Code + OpenSpec + Superpowers 三件套**，规范驱动开发（SDD）完整工具包，开箱即用。
+这是一个与具体项目无关的规范包，提供：
 
-## 📦 包含内容
+- `skills/sdd-workflow.md`：面向 Claude Code、Codex 等 AI 编程工具的规范驱动开发（SDD）工作流；
+- `conventions/frontend-conventions-react.md`：React / Next.js 前端规范；
+- `conventions/frontend-conventions-vue.md`：Vue 3 / Vue Router / Pinia 前端规范；
+- `conventions/frontend-conventions.md`：前端规范选择入口；
+- `conventions/backend-conventions.md`：Spring Boot 后端规范模板，按项目实际情况选用。
 
+工作流由 OpenSpec 记录“做什么”，由 AI 工具和其可用的 Superpowers 能力执行“怎么做”。工具不同，调用方式不同，但提案、实现、验证和归档的原则保持一致。
+
+## 版本策略
+
+规范不永久锁定 Vue、Vue Router、Pinia、React 或其他工具的具体版本。使用时遵循以下顺序：
+
+1. 读取项目的 `package.json`、lockfile、workspace 配置和 peer dependency 约束；
+2. 已有项目优先遵守现有依赖和运行时；
+3. 新项目采用当前稳定、兼容、社区推荐的主版本；
+4. 升级前核对框架、路由、状态管理、构建工具、TypeScript 和 UI 库的兼容性；
+5. 需要可复现构建时提交 lockfile。只有项目明确要求时，才在项目文档中固定具体版本。
+
+## 选择前端规范
+
+先根据目标包的 `package.json` 判断技术栈，再只引用一份对应规范：
+
+| 技术栈 | 规范 |
+| --- | --- |
+| React、Next.js（React）、React + Vite | [`conventions/frontend-conventions-react.md`](conventions/frontend-conventions-react.md) |
+| Vue 3、Vue Router、Pinia、Nuxt（Vue）、Vue + Vite | [`conventions/frontend-conventions-vue.md`](conventions/frontend-conventions-vue.md) |
+
+如果 monorepo 同时包含两种技术栈，按包或页面所在目录分别引用，不能混用 React 和 Vue 规范。
+
+推荐在项目的 `AGENTS.md`、`CLAUDE.md` 或其他 AI 项目说明中加入：
+
+```text
+请先读取 docs/conventions/frontend-conventions.md。
+根据目标包的 package.json 判断使用 React 还是 Vue，
+然后只读取对应的 frontend-conventions-react.md 或 frontend-conventions-vue.md。
+不要混用两份规范；版本以项目现有约束为准，否则采用当前稳定兼容版本。
 ```
-sdd-skill-repo/
-├── skills/
-│   └── sdd-workflow.md          # 核心 Skill（AI 工作流完整指令）
-├── conventions/
-│   ├── frontend-conventions.md  # 前端代码规范
-│   └── backend-conventions.md   # 后端代码规范
-└── README.md
+
+## 快速安装
+
+可以直接把仓库链接和下面这段话发给 Codex、Claude Code 或其他 AI 编程工具：
+
+```text
+请阅读 https://github.com/Mr-Jh-R/code 的 README，
+把 SDD 工作流和适用的代码规范安装到当前项目。
+先识别你是 Codex、Claude Code 还是其他工具，再选择对应的项目级 Skill 路径；
+读取 package.json 判断前端是 React 还是 Vue，只引用适用的前端规范，不能混用；
+保留项目现有依赖约束，新项目使用当前稳定兼容版本，不要把示例版本永久写死；
+安装前列出将创建或修改的文件，安装后验证路径、Skill frontmatter 和本地 Markdown 链接。
 ```
 
-## 🎯 解决什么问题？
+### 1. 克隆仓库并安装 OpenSpec
 
-传统"Vibe Coding"的三个致命缺陷：
-- AI 在长对话后遗忘早期约束，brainstorm 中否决的方案在第 50 轮被重新提出
-- `/clear` 释放上下文后，之前达成的共识全部丢失
-- AI 没有纪律：不会主动先写测试、不会系统定位 bug 根因、不会在写代码前检查 spec
-
-本 Skill 通过 **三件套协同** 彻底解决：
-
-| 工具 | 职责 | 核心价值 |
-|------|------|---------|
-| **OpenSpec** | 管"写什么" | 规范的单一真相源，提案-审查-实施-归档 |
-| **Superpowers** | 管"怎么做" | AI 执行的纪律警察，强制四步流程 |
-| **Claude Code** | 管"谁来跑" | SDD 的最佳执行引擎 |
-
----
-
-## 🚀 快速安装（10 分钟）
-
-### 第一步：克隆本仓库
+以下命令均从目标项目根目录执行，将本仓库克隆到项目的相邻目录 `../sdd-skills`：
 
 ```bash
-git clone https://github.com/Mr-Jh-R/code.git sdd-skills
+git clone https://github.com/Mr-Jh-R/code.git ../sdd-skills
+npm install -g @fission-ai/openspec@latest
 ```
 
-### 第二步：安装 Superpowers
+在目标项目根目录初始化 OpenSpec：
 
-在 Claude Code 会话中执行：
-
+```bash
+openspec init
+openspec --help
 ```
+
+需要非交互初始化时，根据当前工具二选一：`openspec init --tools codex` 或 `openspec init --tools claude`。同时使用多个工具时查看 `openspec init --help` 中的逗号分隔语法。
+
+### 2. 手动安装
+
+在目标项目根目录执行。先复制规范文件：
+
+```bash
+mkdir -p docs/conventions
+cp ../sdd-skills/conventions/frontend-conventions.md docs/conventions/
+cp ../sdd-skills/conventions/frontend-conventions-react.md docs/conventions/
+cp ../sdd-skills/conventions/frontend-conventions-vue.md docs/conventions/
+```
+
+React 和 Vue 规范同时复制是为了保证选择入口中的本地链接完整；项目说明只能引用实际使用的一份。Spring Boot 项目可按需复制 `conventions/backend-conventions.md`，复制前先按项目包名、框架和安全策略适配。
+
+再根据使用的 AI 工具选择一个项目级 Skill 路径：
+
+```bash
+# Codex
+mkdir -p .agents/skills/sdd-workflow
+cp ../sdd-skills/skills/sdd-workflow.md .agents/skills/sdd-workflow/SKILL.md
+
+# Claude Code
+mkdir -p .claude/skills/sdd-workflow
+cp ../sdd-skills/skills/sdd-workflow.md .claude/skills/sdd-workflow/SKILL.md
+```
+
+只使用一个 AI 工具时，不需要创建另一个工具的目录。如果工具或项目仍使用旧的 Claude 单文件路径，也可以复制为 `.claude/skills/sdd-workflow.md`；同一个工具只保留一个实际生效的工作流副本，避免修改后不一致。
+
+PowerShell 等价命令：
+
+```powershell
+$repo = "..\sdd-skills"
+New-Item -ItemType Directory -Force docs\conventions | Out-Null
+Copy-Item "$repo\conventions\frontend-conventions.md", "$repo\conventions\frontend-conventions-react.md", "$repo\conventions\frontend-conventions-vue.md" docs\conventions\
+
+# Codex：只使用 Codex 时执行
+New-Item -ItemType Directory -Force .agents\skills\sdd-workflow | Out-Null
+Copy-Item "$repo\skills\sdd-workflow.md" ".agents\skills\sdd-workflow\SKILL.md"
+
+# Claude Code：只使用 Claude Code 时执行
+New-Item -ItemType Directory -Force .claude\skills\sdd-workflow | Out-Null
+Copy-Item "$repo\skills\sdd-workflow.md" ".claude\skills\sdd-workflow\SKILL.md"
+```
+
+### 3. Claude Code
+
+完成手动安装后，在 Claude Code 中安装 Superpowers（如果当前环境尚未安装）：
+
+```text
 /plugin marketplace add obra/superpowers-marketplace
 /plugin install superpowers@superpowers-marketplace
 ```
 
-### 第三步：安装 OpenSpec CLI
-
-```bash
-npm install -g @fission-ai/openspec@latest
-```
-
-### 第四步：复制 Skill 到你的项目
-
-```bash
-# 在你的项目根目录执行
-mkdir -p .claude/skills
-cp sdd-skills/skills/sdd-workflow.md .claude/skills/
-
-mkdir -p docs/conventions
-cp sdd-skills/conventions/frontend-conventions.md docs/conventions/
-cp sdd-skills/conventions/backend-conventions.md docs/conventions/
-```
-
-### 第五步：初始化 OpenSpec
-
-```bash
-cd your-project
-openspec init
-```
-
-### 第六步：配置 CLAUDE.md
-
-在项目根目录的 `CLAUDE.md` 中添加（让规范在每次对话自动生效）：
+将工作流复制到 `.claude/skills/sdd-workflow/SKILL.md` 后，Claude 会按项目级 Skill 读取。建议在 `CLAUDE.md` 中引用：
 
 ```markdown
-## AI 开发工作流（SDD）
-
-本项目采用规范驱动开发（SDD），三件套：OpenSpec + Superpowers + Claude Code。
-
-### 技术栈
-- 语言/框架：[填写你的技术栈]
-- 包管理器：[pnpm / npm / maven / go]
-- 数据库迁移工具：[Drizzle / Flyway / Liquibase]
-- 测试框架：[vitest / JUnit / pytest]
-
-### 代码规范引用
-- 前端规范：`docs/conventions/frontend-conventions.md`
-- 后端规范：`docs/conventions/backend-conventions.md`
-- Skill 文件：`.claude/skills/sdd-workflow.md`
-
-### 开发四步原则
-1. **需求先探索**：不清晰的需求先 brainstorm 澄清
-2. **规范先制定**：用 `openspec propose` 生成 proposal/design/tasks
-3. **测试先编写**：TDD，实现前先写测试
-4. **验证后声称完成**：运行测试和类型检查通过才能说完成
-
-### 分支命名规范
-- 功能分支：`feature/功能简称`
-- 修复分支：`fix/问题描述`
-- 分支名与 OpenSpec change name 保持一致
+## AI 开发工作流
+- 工作流：`.claude/skills/sdd-workflow/SKILL.md`
+- 前端入口：`docs/conventions/frontend-conventions.md`
+- 后端规范（如已按需安装）：`docs/conventions/backend-conventions.md`
 ```
 
----
+### 4. Codex
 
-## 📋 工作流速查
-
-### 完整开发流程
-
-```
-Brainstorm → Git Worktree → Write a Plan (propose) → Execute (apply + TDD) → Verify → Archive
-```
-
-**核心理念：Action Not Phases**——每个操作是独立能力，不是必须按顺序完成的阶段。小修复可跳过 brainstorm 直接 propose，大特性走完整流程。
-
-### 常用命令速查
+将工作流复制到 `.agents/skills/sdd-workflow/SKILL.md` 后，Codex 会按项目级 Skill 读取。也可以安装为当前用户的全局 Skill：
 
 ```bash
-# 需求探索（对话触发）
-# → "我想做 [功能]，请先 brainstorm"
-
-# 规范制定
-openspec propose [change-name]
-
-# 工作区隔离（对话触发）
-# → "开始实现 [change-name]"
-
-# TDD 实现
-openspec apply [change-name]
-
-# 查看变更列表
-openspec list
-
-# 验证（三维度：完整性 × 正确性 × 一致性）
-openspec verify [change-name]
-
-# 中断后恢复
-openspec continue [change-name]
-
-# 归档
-openspec archive [change-name]
+mkdir -p ~/.codex/skills/sdd-workflow
+cp ../sdd-skills/skills/sdd-workflow.md ~/.codex/skills/sdd-workflow/SKILL.md
 ```
 
-### 对话触发关键词
+在项目的 `AGENTS.md` 中引用：
 
-| 场景 | 对话指令 |
-|------|---------|
-| 需求不清晰 | `我想做 [功能]，请先 brainstorm` |
-| 开始实现 | `开始实现 [change-name]` |
-| TDD 实现 | `请按 TDD 方式实现 tasks.md 中的任务` |
-| 遇到 bug | `遇到这个 bug：[描述]，请系统化分析根因，不要直接给解决方案` |
-| 代码审查 | `请审查这段代码，对照 [design.md] 检查是否符合设计规范` |
-| 中断恢复 | `继续上次 [change-name] 的任务` |
-
----
-
-## 📚 规范文件说明
-
-### 前端规范（`conventions/frontend-conventions.md`）
-
-适用于 React / Vue / Next.js / Umi 项目：
-- API 接口自动生成（`@umijs/openapi`），禁止手写 fetch/axios
-- 组件使用优先级：`@ant-design/x` > `Ant Design 5` > `ProComponents` > 社区库 > 手写
-- 类型命名规范：`API.XxxRequest` / `API.XxxVO`
-- 响应格式统一：`BaseResponse`，用 `res.code === 0` 判断成功
-
-### 后端规范（`conventions/backend-conventions.md`）
-
-适用于 Spring Boot / Java 项目：
-- 分层架构：`controller → service → mapper`
-- 统一响应体：`BaseResponse<T>` + `ResultUtils`
-- 异常体系：`ErrorCode` 枚举 + `BusinessException` + `ThrowUtils`
-- 权限注解：`@AuthCheck(mustRole="admin")`
-- Entity 规范：雪花 ID、逻辑删除（`@TableLogic`）、Javadoc
-
----
-
-## 🔧 技术栈适配
-
-本 Skill 设计为**技术栈无关**，内置模板支持：
-
-| 层 | 支持 |
-|----|------|
-| 前端 | React / Vue / Next.js / Umi / Angular |
-| 后端 | Java（Spring Boot）/ Go（Gin）/ Python（FastAPI）/ Node.js |
-| 数据库迁移 | Drizzle / Flyway / Liquibase / Alembic / golang-migrate |
-| 测试框架 | vitest / jest / JUnit / pytest / go test |
-| 包管理器 | pnpm / npm / yarn / maven / gradle / go mod |
-
----
-
-## 🛡️ Superpowers 四步纪律
-
-Superpowers 的核心是强制 AI 遵守四步流程，防止无约束的 Vibe Coding：
-
-1. **Brainstorm** — 探索需求，澄清边界，提出方案，分段确认（一次只问一个问题）
-2. **Git Worktree** — 自动创建隔离工作区和功能分支，防止污染主分支
-3. **Write a Plan** — 生成 proposal/design/tasks 三件套，形成"不会失忆"的规范文档
-4. **Execute** — TDD 实现：先写测试（红）→ 实现（绿）→ 重构（优化），逐任务打勾
-
----
-
-## 💡 使用技巧
-
-### 避坑指南
-
-- **不要跳过探索阶段**：Brainstorm 是 ROI 最高的环节，30 分钟澄清边界远比编码后返工划算
-- **利用 Action Not Phases 灵活性**：小修复可直接 propose，不必每次走完整流程
-- **tasks.md 是进度锚点**：中断后 AI 通过 checkbox 状态自动定位，可以安全 /clear
-- **设计.md 要记录否决方案**：防止 AI 在第 50 轮对话中重新提出被否决的方案
-
-### 任务中断恢复（三层持久化）
-
-```
-第 1 层（项目级）：CLAUDE.md — 每次对话自动读取
-第 2 层（功能级）：openspec/changes/[name]/ — proposal + design + tasks（checkbox 就是进度）
-第 3 层（代码级）：git worktree + branch — 分支名 = 功能名，commit 历史 = 实现进度
+```markdown
+## AI 开发工作流
+- 工作流：`.agents/skills/sdd-workflow/SKILL.md`
+- 前端入口：`docs/conventions/frontend-conventions.md`
+- 后端规范（如已按需安装）：`docs/conventions/backend-conventions.md`
 ```
 
-任意步骤间可安全 `/clear`，状态在文件系统中，不在对话历史里。
+Codex 的 Superpowers 能力名称和安装方式取决于当前 Codex 环境。若环境已提供对应能力，可使用 `brainstorming`、`writing-plans`、`test-driven-development`、`systematic-debugging`、`verification-before-completion` 等能力；若未提供，仍应遵循本 Skill 中的同等步骤，并以项目命令完成验证。
 
----
+## 工作流速查
 
-## 🤝 参考资料
+完整流程：
 
-- [mattpocock/skills](https://github.com/mattpocock/skills) — 工程师技能库（grill-me、tdd、diagnosing-bugs 等）
-- [Superpowers Plugin](https://github.com/obra/superpowers) — Claude Code 执行纪律插件
-- OpenSpec CLI 帮助：`openspec --help`
+```text
+探索需求 → 创建隔离分支/工作区 → 创建 OpenSpec change → TDD 实现 → 验证 → archive
+```
+
+小型、边界清晰的修改可以跳过不必要的探索，但不能跳过对项目约束、测试和验证结果的检查。OpenSpec CLI 会演进，先用 `openspec --help` 确认当前语法。当前 CLI 的常用命令：
+
+```bash
+openspec new change <change-name>
+openspec status --change <change-name>
+openspec instructions <artifact> --change <change-name>
+openspec instructions apply --change <change-name>
+openspec validate <change-name> --strict
+openspec archive <change-name>
+```
+
+`openspec validate` 只验证 change/spec 产物的结构和规则，不证明代码实现符合设计。实现一致性仍需由当前 AI 环境的 OpenSpec verify 能力或人工逐项对照 specs，并同时运行项目测试、类型检查、lint 和构建。
+
+AI 工具的触发示例：
+
+```text
+我想实现 [功能]，请先按 SDD 工作流探索需求并给出方案。
+请开始实现 [change-name]，先读取 proposal、design 和 tasks。
+请按 TDD 实现 tasks.md，并在每个任务完成后更新勾选状态。
+遇到这个 bug：[描述]，请先系统化定位根因，再提出修复。
+请在声称完成前运行项目的测试、类型检查、lint、构建和 OpenSpec 实现一致性检查。
+```
+
+## 完成标准
+
+声称完成前，必须根据项目实际脚本运行适用的格式化、lint、类型检查、测试和构建命令，并验证 OpenSpec 产物：
+
+```bash
+openspec validate <change-name> --strict
+```
+
+然后使用当前 AI 环境提供的 OpenSpec verify 能力或人工逐项核对实现与 specs。没有运行验证命令、没有检查实现一致性，或存在未解释的失败时，不应声称实现已完成。
+
+## 目录结构
+
+```text
+.
+├── skills/
+│   └── sdd-workflow.md
+├── conventions/
+│   ├── frontend-conventions.md
+│   ├── frontend-conventions-react.md
+│   ├── frontend-conventions-vue.md
+│   └── backend-conventions.md
+└── README.md
+```

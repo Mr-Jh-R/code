@@ -2,18 +2,17 @@
 
 ## 一、文件结构
 
-```
-backend/src/main/java/com/jz/jzbancked/
-├── JzBanckedApplication.java      # 启动类
+```text
+backend/src/main/java/com/example/app/
+├── Application.java              # 启动类（按项目命名）
 ├── annotation/                    # 自定义注解（如 @AuthCheck）
 ├── aop/                           # AOP 切面（AuthInterceptor、LogInterceptor）
-├── advisor/                       # Spring AI Advisor（如 SseToolEventAdvisor）
 ├── common/                        # 通用基础类
 │   ├── BaseResponse.java          # 统一响应体
 │   ├── ResultUtils.java           # 响应构建工具
 │   ├── PageRequest.java           # 分页请求基类
 │   └── DeleteRequest.java         # 通用删除请求
-├── config/                        # 配置类（CORS、数据源、JSON、OSS、MyBatis-Plus 等）
+├── config/                        # 配置类（CORS、数据源、JSON、外部服务、ORM 等）
 ├── constant/                      # 常量类（UserConstant、CommonConstant）
 ├── controller/                    # Controller 层，接收请求并返回响应
 ├── exception/                     # 异常体系
@@ -21,18 +20,13 @@ backend/src/main/java/com/jz/jzbancked/
 │   ├── BusinessException.java     # 自定义业务异常
 │   ├── GlobalExceptionHandler.java# 全局异常处理器
 │   └── ThrowUtils.java            # 条件抛异常工具
-├── manager/                       # 复杂能力封装（AI、OSS、RAG、SSE、Workflow）
+├── manager/                       # 第三方集成、复杂能力和业务编排
 ├── mapper/                        # MyBatis-Plus Mapper 接口
 ├── model/
 │   ├── dto/                       # 请求参数对象，按业务模块分子包
 │   │   ├── user/
-│   │   ├── agent/
-│   │   ├── ai/
-│   │   ├── conversation/
-│   │   ├── kb/
-│   │   ├── llmmodel/
-│   │   ├── llmprovider/
-│   │   └── workflow/
+│   │   ├── order/
+│   │   └── product/
 │   ├── entity/                    # 数据库实体类（与表一一对应）
 │   ├── enums/                     # 枚举类
 │   └── vo/                        # 响应视图对象，按业务模块分子包
@@ -44,26 +38,26 @@ backend/src/main/java/com/jz/jzbancked/
 ## 二、命名规范
 
 | 类型 | 命名格式 | 示例 |
-|------|----------|------|
-| DTO（新增请求） | `XxxAddRequest` | `AgentAddRequest` |
-| DTO（更新请求） | `XxxUpdateRequest` | `AgentUpdateRequest` |
-| DTO（查询请求） | `XxxQueryRequest` | `AgentQueryRequest` |
-| DTO（其他请求） | `XxxXxxRequest` | `UserLoginRequest`, `ConversationRenameRequest` |
-| VO（响应对象） | `XxxVO` | `AgentVO`, `UserVO`, `LoginUserVO` |
-| Entity（实体） | 表名大驼峰 | `User`, `LlmModel`, `KnowledgeBase` |
-| Mapper | `XxxMapper` | `UserMapper`, `AgentMapper` |
+| ------ | ---------- | ------ |
+| DTO（新增请求） | `XxxAddRequest` | `OrderAddRequest` |
+| DTO（更新请求） | `XxxUpdateRequest` | `OrderUpdateRequest` |
+| DTO（查询请求） | `XxxQueryRequest` | `OrderQueryRequest` |
+| DTO（其他请求） | `XxxXxxRequest` | `UserLoginRequest`, `OrderCancelRequest` |
+| VO（响应对象） | `XxxVO` | `OrderVO`, `UserVO`, `LoginUserVO` |
+| Entity（实体） | 表名大驼峰 | `User`, `Order`, `Product` |
+| Mapper | `XxxMapper` | `UserMapper`, `OrderMapper` |
 | Service 接口 | `XxxService` | `UserService` |
 | Service 实现 | `XxxServiceImpl` | `UserServiceImpl` |
-| Controller | `XxxController` | `UserController`, `AgentController` |
-| 枚举类 | `XxxEnum` | `UserRoleEnum`, `LlmModelTypeEnum` |
-| 配置类 | `XxxConfig` 或 `XxxConfiguration` | `CorsConfig`, `WxPayConfiguration` |
+| Controller | `XxxController` | `UserController`, `OrderController` |
+| 枚举类 | `XxxEnum` | `UserRoleEnum`, `OrderStatusEnum` |
+| 配置类 | `XxxConfig` 或 `XxxConfiguration` | `CorsConfig`, `PaymentConfiguration` |
 | 常量类 | `XxxConstant` | `UserConstant`, `CommonConstant` |
-| Manager | `XxxManager` 或 `XxxOrchestrator` | `AiManager`, `AgentOrchestrator` |
+| Manager | `XxxManager` 或 `XxxOrchestrator` | `PaymentManager`, `OrderOrchestrator` |
 | 注解 | 大驼峰 | `AuthCheck` |
 
-**方法命名**：动词 + 名词，如 `userLogin`、`addAgent`、`listAgentByPage`、`deleteAgent`
+**方法命名**：动词 + 名词，如 `userLogin`、`addOrder`、`listOrderByPage`、`deleteOrder`
 
-**包名**：全小写，复合词直接拼接，如 `llmmodel`、`llmprovider`、`kb`
+**包名**：全小写，优先使用清晰的业务域名称，如 `order`、`product`、`payment`
 
 ---
 
@@ -117,21 +111,19 @@ private String sortOrder = "descend";  // 排序方向，默认降序
 ### 4.1 错误码枚举 `ErrorCode`
 
 | 枚举值 | code | 说明 |
-|--------|------|------|
+| -------- | ------ | ------ |
 | `SUCCESS` | 0 | 成功 |
 | `PARAMS_ERROR` | 40000 | 请求参数错误 |
 | `NOT_LOGIN_ERROR` | 40100 | 未登录 |
 | `NO_AUTH_ERROR` | 40101 | 无权限 |
-| `NO_SUB_ERROR` | 40102 | 未订阅 |
+| `CONFLICT_ERROR` | 40900 | 资源状态冲突 |
 | `NOT_FOUND_ERROR` | 40400 | 数据不存在 |
 | `FORBIDDEN_ERROR` | 40300 | 禁止访问 |
 | `SYSTEM_ERROR` | 50000 | 系统内部异常 |
 | `OPERATION_ERROR` | 50001 | 操作失败 |
-| `AI_ERROR` | 50010 | AI 调用异常 |
-| `AI_PROVIDER_DISABLED` | 50011 | AI 提供商已禁用 |
-| `AI_MODEL_DISABLED` | 50012 | AI 模型已禁用 |
+| `EXTERNAL_SERVICE_ERROR` | 50200 | 外部服务调用异常 |
 
-新增错误码时，4xxxx 为客户端错误，5xxxx 为服务端错误，AI 相关从 50010 起。
+新增错误码时，4xxxx 为客户端错误，5xxxx 为服务端错误；业务域专用错误码应在项目内单独规划并记录。
 
 ### 4.2 自定义业务异常 `BusinessException`
 
@@ -183,6 +175,7 @@ public class XxxEntity implements Serializable {
 ```
 
 **规范要点：**
+
 - ID 类型为 `Long`，使用雪花算法 `IdType.ASSIGN_ID`
 - 逻辑删除字段固定为 `isDelete`（Integer），不做物理删除
 - 时间字段类型用 `Date`（非 `LocalDateTime`）
@@ -225,6 +218,7 @@ public class XxxController {
 ```
 
 **规范要点：**
+
 - 使用 `@Resource` 注入（不用 `@Autowired`）
 - 方法第一行用 `ThrowUtils.throwif` 做空校验
 - 返回值统一 `BaseResponse<T>`，用 `ResultUtils.success()` / `ResultUtils.error()` 构建
@@ -273,7 +267,7 @@ springdoc:
   group-configs:
     - group: 'default'
       paths-to-match: '/**'
-      packages-to-scan: com.xx.xxxxx.controller
+      packages-to-scan: com.example.app.controller
 
 knife4j:
   enable: true
@@ -282,10 +276,10 @@ knife4j:
   basic:
     enable: true
     username: admin
-    password: jzadmin   # Basic Auth 凭证
+    password: ${API_DOC_PASSWORD}   # 通过环境变量提供 Basic Auth 凭证
 ```
 
-访问地址：`http://localhost:8899/api/doc.html`
+访问地址以项目配置为准：`http://localhost:<server-port>/<context-path>/doc.html`。其中端口和上下文路径分别读取 `server.port`、`server.servlet.context-path`；如果项目调整了 Knife4j 路径，也应使用实际配置。
 
 ---
 
@@ -317,7 +311,7 @@ public enum XxxEnum {
 
 ---
 
-## 十、MySQL 建表规范(存在或使用MySQL是才遵循)
+## 十、MySQL 建表规范（仅在项目使用 MySQL 时适用）
 
 > 以下规范适用于 MySQL，其他数据库（如 PostgreSQL）语法不同，不适用。
 
@@ -350,7 +344,7 @@ isDelete     tinyint      default 0                 not null comment '是否删�
 ```
 
 | 字段 | 说明 |
-|------|------|
+| ------ | ------ |
 | `editTime` | 最后编辑时间，默认当前时间，由业务层手动更新 |
 | `createTime` | 创建时间，默认当前时间，不再变更 |
 | `updateTime` | 更新时间，每次 UPDATE 自动刷新 |
@@ -372,7 +366,7 @@ isDelete     tinyint      default 0                 not null comment '是否删�
 ### 10.6 索引规范
 
 | 类型 | 命名格式 | 示例 |
-|------|---------|------|
+| ------ | --------- | ------ |
 | 普通索引 | `idx_字段名` | `idx_userId` |
 | 复合索引 | `idx_字段1_字段2` | `idx_userId_status` |
 | 唯一约束 | `uk_字段名` | `uk_userAccount` |
@@ -417,25 +411,25 @@ create index idx_userId on exampleTable (userId);
 ### 10.9 常用字段类型参考
 
 | 场景 | 类型 |
-|------|------|
+| ------ | ------ |
 | 主键 / 外键 ID | `bigint` |
-| 短字符串（账号、名称、URL）| `varchar(N)` |
-| 长文本（内容、JSON 配置）| `text` |
+| 短字符串（账号、名称、URL） | `varchar(N)` |
+| 长文本（内容、JSON 配置） | `text` |
 | 时间 | `datetime` |
 | 状态 / 逻辑删除标记 | `tinyint` |
-| 数值（排序、计数）| `int` |
+| 数值（排序、计数） | `int` |
 
 ---
 
 ## 十一、依赖与框架
 
 | 功能 | 依赖 |
-|------|------|
+| ------ | ------ |
 | ORM | MyBatis-Plus |
 | 数据库 | MySQL（业务数据）+ PostgreSQL（向量存储） |
 | 日志 | SLF4J + `@Slf4j` |
 | 对象简化 | Lombok（`@Data`、`@Getter`、`@Slf4j` 等） |
 | 对象拷贝 | `BeanUtils.copyProperties(src, target)` |
-| AI 框架 | Spring AI |
+| 领域扩展框架 | 按项目需求选型（可选） |
 | API 文档 | springdoc-openapi + knife4j |
-| 文件存储 | 阿里云 OSS |
+| 文件存储 | 通过项目统一适配层接入所选服务 |
