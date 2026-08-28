@@ -6,7 +6,7 @@
 - `conventions/frontend-conventions-react.md`：React / Next.js 前端规范；
 - `conventions/frontend-conventions-vue.md`：Vue 3 / Vue Router / Pinia 前端规范；
 - `conventions/frontend-conventions.md`：前端规范选择入口；
-- `conventions/backend-conventions.md`：Spring Boot 后端规范模板，按项目实际情况选用。
+- `conventions/backend-conventions.md`：Spring Boot 后端规范模板，包含分层、设计模式、可读性、中文 Javadoc 和质量门禁，按项目实际情况选用。
 
 工作流由 OpenSpec 记录“做什么”，由 AI 工具和其可用的 Superpowers 能力执行“怎么做”。工具不同，调用方式不同，但提案、实现、验证和归档的原则保持一致。
 
@@ -80,9 +80,12 @@ mkdir -p docs/conventions
 cp ../sdd-skills/conventions/frontend-conventions.md docs/conventions/
 cp ../sdd-skills/conventions/frontend-conventions-react.md docs/conventions/
 cp ../sdd-skills/conventions/frontend-conventions-vue.md docs/conventions/
+
+# Spring Boot 项目按需复制
+cp ../sdd-skills/conventions/backend-conventions.md docs/conventions/
 ```
 
-React 和 Vue 规范同时复制是为了保证选择入口中的本地链接完整；项目说明只能引用实际使用的一份。Spring Boot 项目可按需复制 `conventions/backend-conventions.md`，复制前先按项目包名、框架和安全策略适配。
+React 和 Vue 规范同时复制是为了保证选择入口中的本地链接完整；项目说明只能引用实际使用的一份。Spring Boot 项目可按需复制 `conventions/backend-conventions.md`，复制前先按项目包名、框架和安全策略适配，并在项目说明中要求修改后端代码前读取该规范。
 
 再根据使用的 AI 工具选择一个项目级 Skill 路径：
 
@@ -104,6 +107,9 @@ PowerShell 等价命令：
 $repo = "..\sdd-skills"
 New-Item -ItemType Directory -Force docs\conventions | Out-Null
 Copy-Item "$repo\conventions\frontend-conventions.md", "$repo\conventions\frontend-conventions-react.md", "$repo\conventions\frontend-conventions-vue.md" docs\conventions\
+
+# Spring Boot 项目按需复制
+Copy-Item "$repo\conventions\backend-conventions.md" docs\conventions\
 
 # Codex：只使用 Codex 时执行
 New-Item -ItemType Directory -Force .agents\skills\sdd-workflow | Out-Null
@@ -197,6 +203,7 @@ openspec validate <change-name> --strict
 
 ```text
 .
+├── backend-conventions.md        # 指向正式后端规范的兼容入口
 ├── skills/
 │   └── sdd-workflow.md
 ├── conventions/

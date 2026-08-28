@@ -16,7 +16,8 @@ description: Use when starting new features, substantial bug fixes, API or datab
    - React、Next.js（React）、React + Vite 只读取 `frontend-conventions-react.md`；
    - Vue 3、Vue Router、Pinia、Nuxt（Vue）、Vue + Vite 只读取 `frontend-conventions-vue.md`；
    - monorepo 按目标包分别选择，不能混用两份规范。
-5. 版本以项目 `package.json`、lockfile、workspace 和 peer dependency 约束为准。新项目使用当前稳定、兼容、推荐版本，不把本 Skill 中的示例版本当作永久要求。
+5. 新增或修改 Spring Boot 后端代码时，如果项目已安装 `docs/conventions/backend-conventions.md`，必须先读取并遵守；其中模板与项目现有约定冲突时，以项目约定为准。
+6. 版本以项目构建文件、lockfile、workspace 和依赖约束为准。新项目使用当前稳定、兼容、推荐版本，不把本 Skill 中的示例版本当作永久要求。
 
 ## 能力映射
 
@@ -124,7 +125,7 @@ openspec instructions <artifact> --change <change-name>
 
 - 所有 Scenario 是否实现，是否存在未说明的行为变化；
 - 数据库/API 兼容性、权限、错误处理和迁移是否完整；
-- 是否遵守目标技术栈规范，React/Vue 规范是否选对；
+- 是否遵守目标技术栈规范，React/Vue 规范是否选对，Spring Boot 任务是否遵守后端规范；
 - 是否引入不必要依赖、重复实现或越界重构；
 - tests 是否真正覆盖新行为和回归风险。
 
