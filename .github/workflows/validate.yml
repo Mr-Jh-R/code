@@ -19,3 +19,5 @@ jobs:
           python-version: "3.12"
       - name: Validate repository
         run: python scripts/validate_repository.py
+      - name: Validate API audit helper
+        run: python -B -m unittest discover -s skills/api-contract-docs/scripts -p "test_*.py"

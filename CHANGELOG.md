@@ -2,6 +2,24 @@
 
 本文件记录规范行为和安装结构的变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [Semantic Versioning](https://semver.org/)。
 
+## [Unreleased]
+
+### Added
+
+- 增加按用途、归属和生命周期选择目录的通用项目文件规范。
+- 增加通用 AI 项目资产、外部资料和生成物的归类规则。
+- 为 SDD Skill 增加标准模式与简单模式，并明确 Superpowers、subagent 等增强能力是可选执行策略。
+- 增加通用目录布局与 AI 工作流的研究依据和一手资料索引。
+- 增加通用 Git 协作规范，覆盖基线、未提交依赖、并行隔离、提交整合、发布和交付状态。
+- 增加项目工作流约定模板，将集成分支、文档入口和发布方式留给使用方配置。
+- 增加通用 `api-contract-docs` Skill、调用方文档模板和只读 OpenAPI 核对脚本及测试。
+
+### Changed
+
+- 重写 README，提供人类导航、版本边界、PowerShell/Bash 接入步骤和 AI 工具入口示例。
+- SDD 从项目入口读取 Git、文件归类和 API 文档规则，并明确简单模式的开关与完成范围。
+- 文件归类规范可独立复制，避免依赖使用方不存在的研究文件。
+
 ## [2.0.0] - 2026-09-02
 
 ### Added

@@ -1,16 +1,40 @@
 ---
 name: sdd-workflow
-description: Run specification-driven development for new features, substantial bug fixes, API or database changes, cross-module work, and requests that mention SDD, OpenSpec, proposal, design, specs, tasks, implementation, verification, or archive across Codex, Claude Code, and other AI coding tools.
+description: Run specification-driven development for features, substantial fixes, API/database or cross-module changes, or an explicit SDD standard/simple request. Use OpenSpec for change artifacts and the project's conventions for implementation and verification.
 ---
 
 # SDD 工作流
 
 用 OpenSpec 保存“做什么、为什么和进度”，用当前工具完成探索、实现、调试、审查和验证。能力名称可以不同，产出物和完成标准保持一致。
 
+## 模式选择
+
+本 Skill 支持标准模式和简单模式。模式只决定可选的探索、委派和文档开销，不改变安全、正确性、测试和完成证据要求。
+
+- **标准 SDD**：按任务风险选择完整探索、OpenSpec 产物、TDD、审查和归档；在用户与项目允许且环境提供时，按需使用 Superpowers、subagent 等增强能力。
+- **简单 SDD**：当用户说“使用 SDD 简单模式”“关闭 Superpowers”或等价表达时，由主 Agent 串行完成，不调用可选的 Superpowers 或子代理流程，精简探索和计划篇幅，保留范围、验收标准、必要设计、任务清单和针对性验证。需要 OpenSpec 的变更仍使用其要求的产物；精简不减少用户要求的功能或验收范围。
+
+用户本次显式选择优先，其次沿用会话选择、项目默认；都未指定时采用标准模式。`sdd simple` / `Superpowers off` 选择简单模式；`sdd standard` 恢复标准模式但不自动开启插件；`Superpowers on` 切换到标准模式并允许使用已安装的 Superpowers。委派仍按用户与项目范围判断。开关是本 Skill 的自然语言约定，不修改全局工具设置，也不自动安装插件。简单模式仍须读取适用规范并完成测试、验证。
+
+本仓库不把 Superpowers 或 subagent 当作必需依赖。它们是执行策略，OpenSpec 才是可追踪的规格和进度载体。
+
+## 能力角色
+
+| 能力 | 负责什么 | 是否必需 |
+| --- | --- | --- |
+| OpenSpec | 保存变更的 proposal、specs、design、tasks，承载状态、验证和归档 | 复杂、新功能、接口/数据库和跨模块变更按项目要求启用；小改动可以不创建 change |
+| Superpowers | 可选的 brainstorming、TDD、执行计划和复查方法论 | 否。只有当前环境已安装且用户允许时使用 |
+| subagent/委派 | 将探索、实现或审查拆给独立上下文并行执行 | 否。按复杂度、风险和等待成本选择 |
+| 调试与验证能力 | 复现、根因分析、测试、静态检查和完成前证据 | 验证本身是必需的，具体工具不是 |
+
+OpenSpec 的动作可以迭代执行：探索、提案、应用、更新、同步、验证和归档不要求每个任务都一次性走完。当前环境没有某个插件时，沿用相同目标和完成条件的内置步骤。
+
 ## 开始前
 
 1. 读取项目入口文件，例如 `AGENTS.md`、`CLAUDE.md`、README 和目标目录附近的约束。
 2. 根据项目入口完整读取本次任务适用的规范、项目画像和技术附录，不自行猜测路径或技术栈。
+   - 工作区、分支、提交、整合和发布遵循项目引用的 Git 规范与工作流约定。
+   - 新建文件或指定输出前读取项目引用的文件归类规范。
 3. 检查 `openspec/`、现有 change、当前分支、工作区状态和权威验证命令。
 4. 从构建文件、lockfile、workspace 和运行配置识别实际版本，不替换项目已有工具。
 5. 保留用户未提交改动；遇到重叠修改时理解并协作，不重置或覆盖。
@@ -22,6 +46,7 @@ description: Run specification-driven development for new features, substantial 
 - 新功能、跨模块修改、API 或数据库变更：执行完整探索、change、实现、验证和归档。
 - 边界清晰的中型修改：可以缩短探索，但保留 change、tasks 和验证。
 - 小型文案、格式或局部低风险修复：可以不创建 change，仍需读取约束并运行适用验证。
+- 仅核对或编写接口文档且不改变契约：使用项目安装的 `api-contract-docs` 或既有文档流程，可独立完成；发现实现缺陷时报告，不自动扩大成开发任务。
 - 难以复现的缺陷：先执行系统化调试，根因明确后再创建或更新 change。
 
 让流程与风险匹配。既不为形式制造无价值文档，也不以“小改动”为由跳过必要验证。
@@ -63,7 +88,7 @@ description: Run specification-driven development for new features, substantial 
 
 ## 阶段三：隔离工作区
 
-遵守项目分支和 worktree 规则。大型、并行或长期变更使用独立分支/worktree；小改动可以在当前分支完成。分支名称尽量与 change name 对应。
+按项目 Git 规范确认起始 SHA、未提交依赖与合入目标。同一功能接续优先复用原工作区；新对话不自动新建分支。确需并行隔离时使用独立工作区并记录归属；长期或高风险变更按项目策略决定是否隔离。
 
 完成条件：变更与用户现有工作隔离，基线和目标分支明确。
 
@@ -109,6 +134,8 @@ description: Run specification-driven development for new features, substantial 
 5. 测试有效性、设计复杂度和变更范围。
 6. 项目画像、通用规范和选中技术附录的符合性。
 
+涉及接口时，同步核对契约、生成客户端和调用文档的版本；文档编写通过项目入口找到 `api-contract-docs` 或等价流程。纯文档修改使用文档检查，代码行为变化使用对应代码门禁。
+
 运行仓库真实提供的格式、lint、类型、测试、构建、迁移和契约命令。OpenSpec 自身校验只证明产物结构有效，不证明实现符合设计；继续使用实现验证能力或人工逐项核对所有 scenarios 和 tasks。
 
 声称完成前报告刚刚执行的命令、结果、跳过项和剩余风险。
@@ -127,6 +154,8 @@ description: Run specification-driven development for new features, substantial 
 
 优先使用环境提供的 OpenSpec 归档能力；否则根据当前 `openspec --help` 执行。归档后检查主 specs 是否同步，git diff 是否只包含预期文件。
 
+归档只表示该 change 的产物与验收收敛；提交、合入和发布状态仍按项目 Git 规范分别核对。
+
 ## 中断恢复
 
 恢复工作时重新建立事实：
@@ -144,4 +173,4 @@ description: Run specification-driven development for new features, substantial 
 - 主要修改模块或文件。
 - 实际验证命令和结果。
 - 跳过项、剩余风险或后续迁移。
-- 已创建的分支、提交、推送或 PR 信息。
+- 按项目 Git 规范分别报告已实现、已提交、已集成、已发布的状态；未完成的整合说明来源与后续责任。
