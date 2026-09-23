@@ -2,7 +2,7 @@
 
 本文件记录规范行为和安装结构的变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [Semantic Versioning](https://semver.org/)。
 
-## [Unreleased]
+## [2.1.0] - 2026-09-23
 
 ### Added
 
@@ -19,6 +19,13 @@
 - 重写 README，提供人类导航、版本边界、PowerShell/Bash 接入步骤和 AI 工具入口示例。
 - SDD 从项目入口读取 Git、文件归类和 API 文档规则，并明确简单模式的开关与完成范围。
 - 文件归类规范可独立复制，避免依赖使用方不存在的研究文件。
+
+### Compatibility and upgrade
+
+- 无破坏性变更，保留 v2 的前后端规范入口与 Skill 目录；新增 Git/目录规则、项目工作流模板和 API 文档 Skill 可按需采用。
+- 从 v2.0.0 升级时按 README 选择新增文件，合并项目入口指针，保留项目已有分支、文档路径和验证命令；不自动迁移业务文件或修改工具全局设置。
+- 已安装 SDD 的项目更新完整 Skill 目录后可使用标准/简单模式；未指定时仍采用标准模式，简单模式保留必要的测试与验证。
+- 受影响入口：README、VERSION、后端项目画像模板、SDD Skill；新增入口为文件归类规范、Git 规范、项目工作流模板及 API 文档 Skill。
 
 ## [2.0.0] - 2026-09-02
 

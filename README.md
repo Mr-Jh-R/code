@@ -24,13 +24,13 @@
 
 ### 1. 选择来源版本
 
-已发布版本应固定 release tag。例如已有的 v2.0.0：
+采用本规范包时固定 release tag，当前版本为 v2.1.0：
 
 ```bash
-git clone --branch v2.0.0 --depth 1 https://github.com/Mr-Jh-R/code.git ../code-standards
+git clone --branch v2.1.0 --depth 1 https://github.com/Mr-Jh-R/code.git ../code-standards
 ```
 
-**版本边界：v2.0.0 包含原有前后端规范和 SDD；本页的通用目录规范、Git 规范、API 文档 Skill 和 SDD 简单模式目前在 [Unreleased](CHANGELOG.md)，尚不在该标签中。** 下方新增能力的接入示例需使用包含这些文件的已审阅工作副本，或将来实际发布且包含它们的标签。不要把新文件记为来自 v2.0.0。
+v2.1.0 包含原有前后端规范，以及通用目录规范、Git 规范、API 文档 Skill 和 SDD 简单模式。下方接入示例可直接使用这个版本；升级说明见 [CHANGELOG](CHANGELOG.md)。
 
 在项目约定中记录来源 URL 和实际 tag/SHA；采用未提交草稿时明确注明草稿状态。规则在目标项目保存为本地副本，日常开发不依赖网络或可变的远端 `main`。
 
@@ -182,7 +182,7 @@ git diff --check
 
 第一条检查 Markdown 链接、围栏、空白、版本和 Skill frontmatter；第二条验证 API 核对脚本的路由匹配和报告行为。CI 运行同样的文档与脚本检查，机械通过不代替规范内容审查。
 
-版本采用 [Semantic Versioning](https://semver.org/)。当前未发布改动记入 [CHANGELOG](CHANGELOG.md) 的 Unreleased；发布流程见 [VERSIONING](VERSIONING.md)。使用方升级时审查差异、保留本地项目事实、同步入口并运行相关验证。
+版本采用 [Semantic Versioning](https://semver.org/)。版本变化记录在 [CHANGELOG](CHANGELOG.md)，后续未发布改动另记为 Unreleased；发布流程见 [VERSIONING](VERSIONING.md)。使用方升级时审查差异、保留本地项目事实、同步入口并运行相关验证。
 
 从旧 Spring Boot/MyBatis-Plus 模板迁移见 [v1 到 v2 迁移说明](MIGRATION-v1-to-v2.md)，同一项目只启用一个规范 major 版本。目录组织和 AI 工作流依据见 [研究记录](docs/research/repository-layout-and-ai-workflows.md)。
 
