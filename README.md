@@ -24,13 +24,13 @@
 
 ### 1. 选择来源版本
 
-采用本规范包时固定 release tag，当前版本为 v2.1.0：
+采用本规范包时固定 release tag，当前版本为 v2.2.0：
 
 ```bash
-git clone --branch v2.1.0 --depth 1 https://github.com/Mr-Jh-R/code.git ../code-standards
+git clone --branch v2.2.0 --depth 1 https://github.com/Mr-Jh-R/code.git ../code-standards
 ```
 
-v2.1.0 包含原有前后端规范，以及通用目录规范、Git 规范、API 文档 Skill 和 SDD 简单模式。下方接入示例可直接使用这个版本；升级说明见 [CHANGELOG](CHANGELOG.md)。
+v2.2.0 包含原有前后端规范、通用目录规范、Git 规范、API 文档 Skill，以及默认简单模式的 SDD。下方接入示例可直接使用这个版本；升级说明见 [CHANGELOG](CHANGELOG.md)。
 
 在项目约定中记录来源 URL 和实际 tag/SHA；采用未提交草稿时明确注明草稿状态。规则在目标项目保存为本地副本，日常开发不依赖网络或可变的远端 `main`。
 
@@ -157,6 +157,8 @@ AGENTS/CLAUDE、技术栈、分支约定和已安装技能。复用已有权威�
 采用 OpenSpec 的项目按其 [官方安装说明](https://github.com/Fission-AI/OpenSpec) 安装、初始化，并通过当前 `openspec --help` 确认命令。只安装 Git/目录规则或只维护接口文档时不需要 OpenSpec。
 
 ### SDD 模式
+
+未指定模式时默认使用简单 SDD。项目可以在工作流约定中选择 standard，但用户本次明确选择优先。
 
 - `使用 SDD 简单模式` / `sdd simple`：主 Agent 串行完成，关闭可选 Superpowers 和子代理流程，精简探索和文档；保留适用的 OpenSpec 产物及必要测试、验证。
 - `使用 SDD 标准模式` / `sdd standard`：按风险执行完整流程，增强工具是否使用仍遵循用户与项目偏好。

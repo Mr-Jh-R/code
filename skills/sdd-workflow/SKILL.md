@@ -14,7 +14,7 @@ description: Run specification-driven development for features, substantial fixe
 - **标准 SDD**：按任务风险选择完整探索、OpenSpec 产物、TDD、审查和归档；在用户与项目允许且环境提供时，按需使用 Superpowers、subagent 等增强能力。
 - **简单 SDD**：当用户说“使用 SDD 简单模式”“关闭 Superpowers”或等价表达时，由主 Agent 串行完成，不调用可选的 Superpowers 或子代理流程，精简探索和计划篇幅，保留范围、验收标准、必要设计、任务清单和针对性验证。需要 OpenSpec 的变更仍使用其要求的产物；精简不减少用户要求的功能或验收范围。
 
-用户本次显式选择优先，其次沿用会话选择、项目默认；都未指定时采用标准模式。`sdd simple` / `Superpowers off` 选择简单模式；`sdd standard` 恢复标准模式但不自动开启插件；`Superpowers on` 切换到标准模式并允许使用已安装的 Superpowers。委派仍按用户与项目范围判断。开关是本 Skill 的自然语言约定，不修改全局工具设置，也不自动安装插件。简单模式仍须读取适用规范并完成测试、验证。
+用户本次显式选择优先，其次沿用会话选择、项目默认；都未指定时采用简单模式。`sdd simple` / `Superpowers off` 选择简单模式；`sdd standard` 切换到标准模式但不自动开启插件；`Superpowers on` 切换到标准模式并允许使用已安装的 Superpowers。委派仍按用户与项目范围判断。开关是本 Skill 的自然语言约定，不修改全局工具设置，也不自动安装插件。简单模式仍须读取适用规范并完成测试、验证。
 
 本仓库不把 Superpowers 或 subagent 当作必需依赖。它们是执行策略，OpenSpec 才是可追踪的规格和进度载体。
 
