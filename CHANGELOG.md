@@ -2,6 +2,22 @@
 
 本文件记录规范行为和安装结构的变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [Semantic Versioning](https://semver.org/)。
 
+## [Unreleased]
+
+后续未发布改动记录在这里。
+
+## [2.3.0] - 2026-09-30
+
+### Changed
+
+- 完善 Java/Spring/MySQL 规范，吸收 P3C 中低争议的命名、控制流、集合、异常、测试、事务回滚和 SQL 规则。
+- 明确 Entity、DTO、VO、领域模型和公共请求模型的边界与按领域归档建议。
+- 完善 React/Vue 的组件库优先、自定义组件复用和避免过早抽象规则。
+
+### Added
+
+- 增加 P3C 与当前规范的差距研究记录和 jz_code 模型目录研究记录。
+
 ## [2.2.0] - 2026-09-28
 
 ### Changed

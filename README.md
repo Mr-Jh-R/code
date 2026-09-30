@@ -24,13 +24,13 @@
 
 ### 1. 选择来源版本
 
-采用本规范包时固定 release tag，当前版本为 v2.2.0：
+采用本规范包时固定 release tag，当前版本为 v2.3.0：
 
 ```bash
-git clone --branch v2.2.0 --depth 1 https://github.com/Mr-Jh-R/code.git ../code-standards
+git clone --branch v2.3.0 --depth 1 https://github.com/Mr-Jh-R/code.git ../code-standards
 ```
 
-v2.2.0 包含原有前后端规范、通用目录规范、Git 规范、API 文档 Skill，以及默认简单模式的 SDD。下方接入示例可直接使用这个版本；升级说明见 [CHANGELOG](CHANGELOG.md)。
+v2.3.0 包含原有前后端规范、P3C 差距修订、通用目录规范、Git 规范、API 文档 Skill，以及默认简单模式的 SDD。下方接入示例可直接使用这个版本；升级说明见 [CHANGELOG](CHANGELOG.md)。
 
 在项目约定中记录来源 URL 和实际 tag/SHA；采用未提交草稿时明确注明草稿状态。规则在目标项目保存为本地副本，日常开发不依赖网络或可变的远端 `main`。
 

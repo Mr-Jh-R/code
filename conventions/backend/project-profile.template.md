@@ -7,7 +7,7 @@
 ```yaml
 standard:
   source: https://github.com/Mr-Jh-R/code
-  version: v2.2.0
+  version: v2.3.0
   core: docs/conventions/backend/core.md
   design_patterns: docs/conventions/backend/design-patterns.md
 

@@ -6,6 +6,7 @@
 
 - 启动类位于根包，不使用 default package；业务包优先按能力组织。
 - Spring Bean 使用构造器注入，依赖字段为 `final`；不使用字段注入。
+- 单构造器通常不需要 `@Autowired`；多个实现使用 `@Qualifier`、`@Primary` 或明确 Bean 名称。`@Resource` 默认按名称解析，只在项目需要按名选择 Bean 时使用。
 - 只有真实替换实现、跨模块端口或外部适配价值时定义接口，不机械创建 `Service` + `ServiceImpl`。
 - 配置、适配器和持久化实现保持在模块内部，公开包只放稳定接口和共享契约。
 - 可以使用 Spring Modulith 或 ArchUnit 验证模块无环、公开 API 和允许依赖。
@@ -47,11 +48,14 @@ public enum ErrorCode {
 
 ## 四、事务
 
-- `@Transactional` 放在具体用例的公共入口，明确 readOnly、timeout 和需要的隔离/传播语义。
+- `@Transactional` 放在具体用例的公共入口，明确 readOnly、timeout 和需要的隔离/传播语义；不要给所有方法或整个类机械添加事务。
 - 默认代理模式只拦截从代理外部进入的调用；同类自调用不会应用被调用方法上的事务配置。
 - private 方法、异步方法和新线程不自动继承调用方事务。
 - 默认只对 `RuntimeException` 和 `Error` 回滚；checked exception 需要明确 `rollbackFor` 或项目统一策略。
+- 事务代码捕获异常后不得静默继续；需要回滚时重新抛出、标记回滚或使用明确的编程式边界。
 - 事务中不执行耗时 HTTP、模型调用、文件解析、消息等待或 WebSocket 关闭。
+- 默认优先声明式事务；只有动态边界、独立提交、特殊传播/隔离/超时、显式事务命名、补偿或分段处理时才使用 `TransactionTemplate`、`TransactionalOperator` 或事务管理器，并记录理由。
+- 事务涉及缓存、搜索、消息或统计时，设计对应的 outbox、补偿、重试或修正路径，不能把数据库回滚当成跨系统回滚。
 - 需要独立记录失败状态时，拆分 Bean、使用 `TransactionTemplate` 或明确的新事务边界。
 - 乐观更新检查影响行数，并转换为冲突错误。
 
