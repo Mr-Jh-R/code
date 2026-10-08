@@ -12,6 +12,7 @@
 4. 只读取项目画像选中的技术附录：
    - Java：[`backend/languages/java.md`](backend/languages/java.md)
    - Spring Boot：[`backend/frameworks/spring-boot.md`](backend/frameworks/spring-boot.md)
+   - MyBatis / MyBatis-Plus：[`backend/frameworks/mybatis-plus.md`](backend/frameworks/mybatis-plus.md)
    - MySQL：[`backend/databases/mysql.md`](backend/databases/mysql.md)
    - PostgreSQL：[`backend/databases/postgresql.md`](backend/databases/postgresql.md)
    - AI/LLM：[`backend/extensions/ai-llm.md`](backend/extensions/ai-llm.md)

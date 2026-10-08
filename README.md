@@ -14,6 +14,7 @@
 | 开发功能或处理复杂变更 | [SDD Skill](skills/sdd-workflow/SKILL.md) | AI 执行，开发者核对产物 |
 | 审查或编写 API 调用文档 | [API 文档 Skill](skills/api-contract-docs/SKILL.md) | 开发者可直接阅读，AI 可加载执行 |
 | 后端实现、设计与审查 | [后端入口](conventions/backend-conventions.md) | 按项目画像选择技术附录 |
+| Mapper 映射、SQL 与 CRUD 复用 | [MyBatis / MyBatis-Plus 附录](conventions/backend/frameworks/mybatis-plus.md) | 仅采用该技术的项目选读 |
 | 前端实现、设计与审查 | [前端入口](conventions/frontend-conventions.md) | 按目标包选择 React 或 Vue |
 
 本仓库的 `conventions/` 是规范源文件，`skills/` 是可复制的完整技能包，`docs/research/` 保存研究依据，`scripts/` 与 `.github/workflows/` 负责自检。使用方无需照搬本仓库的发布方式或目录树。
@@ -24,13 +25,13 @@
 
 ### 1. 选择来源版本
 
-采用本规范包时固定 release tag，当前版本为 v2.3.0：
+采用本规范包时固定 release tag，当前版本为 v2.4.0：
 
 ```bash
-git clone --branch v2.3.0 --depth 1 https://github.com/Mr-Jh-R/code.git ../code-standards
+git clone --branch v2.4.0 --depth 1 https://github.com/Mr-Jh-R/code.git ../code-standards
 ```
 
-v2.3.0 包含原有前后端规范、P3C 差距修订、通用目录规范、Git 规范、API 文档 Skill，以及默认简单模式的 SDD。下方接入示例可直接使用这个版本；升级说明见 [CHANGELOG](CHANGELOG.md)。
+v2.4.0 在原有前后端规范、Git 规范和默认简单模式的 SDD 基础上，增加 MyBatis/MyBatis-Plus 可选附录，并区分持续生成文件与人工维护脚手架。下方接入示例可直接使用这个版本；升级说明见 [CHANGELOG](CHANGELOG.md)。
 
 在项目约定中记录来源 URL 和实际 tag/SHA；采用未提交草稿时明确注明草稿状态。规则在目标项目保存为本地副本，日常开发不依赖网络或可变的远端 `main`。
 
@@ -108,6 +109,8 @@ done
 | 前端 | `conventions/frontend-conventions.md` 和 React/Vue 两份规范 | 为保持相对链接完整一并复制；只读取目标包使用的那一份 |
 
 安装完整关联文档是为了保持本地链接有效，不要求加载无关规则或安装对应技术依赖。后端画像与项目工作流约定互相引用已有命令或入口，不重复维护同一事实。无需后端或前端能力时不复制对应包。
+
+使用 MyBatis/MyBatis-Plus 的项目，在后端画像的 `selected_appendices` 中加入 `docs/conventions/backend/frameworks/mybatis-plus.md`。该附录直接规定 Mapper 命名、资源位置、XML 结构和映射引用，人和 AI 均可编写，不需要特定 IDE 插件；普通 CRUD 可复用 `BaseMapper` 或 `IService/ServiceImpl`，复杂业务保留用例边界。XML 按实际需要创建；采用其他持久化技术的项目无需选择它。
 
 ### 4. 在 AI 工具入口加入指针
 
@@ -187,5 +190,7 @@ git diff --check
 版本采用 [Semantic Versioning](https://semver.org/)。版本变化记录在 [CHANGELOG](CHANGELOG.md)，后续未发布改动另记为 Unreleased；发布流程见 [VERSIONING](VERSIONING.md)。使用方升级时审查差异、保留本地项目事实、同步入口并运行相关验证。
 
 从旧 Spring Boot/MyBatis-Plus 模板迁移见 [v1 到 v2 迁移说明](MIGRATION-v1-to-v2.md)，同一项目只启用一个规范 major 版本。目录组织和 AI 工作流依据见 [研究记录](docs/research/repository-layout-and-ai-workflows.md)。
+
+MyBatis XML 与通用 Service 的官方文档、版本实现和参考项目核对见 [研究记录](docs/research/mybatis-plus-mapping-service-guidance.md)；项目执行时以所选 [持久化附录](conventions/backend/frameworks/mybatis-plus.md) 为准。
 
 本仓库使用 [Apache License 2.0](LICENSE)。复制规范、Skill 与脚本时保留适用的版权和许可证说明。

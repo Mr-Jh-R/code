@@ -7,7 +7,7 @@
 ```yaml
 standard:
   source: https://github.com/Mr-Jh-R/code
-  version: v2.3.0
+  version: v2.4.0
   core: docs/conventions/backend/core.md
   design_patterns: docs/conventions/backend/design-patterns.md
 
@@ -66,6 +66,8 @@ deployment:
 - 认证、授权和内部接口策略：待填写。
 - 敏感数据、日志和保留期策略：待填写。
 - 数据库 schema、迁移和本地集成验证：待填写。
+- 使用 MyBatis/MyBatis-Plus 时：在 `selected_appendices` 添加 `docs/conventions/backend/frameworks/mybatis-plus.md`，记录基础 CRUD 与业务用例的边界、XML/自动映射及插件验证约定；未使用时删除本项。
+- 使用代码生成器时：记录持续生成或人工维护的文件范围、模板/输入来源、输出目录及覆盖策略；未使用时删除本项。
 
 ## 例外登记
 

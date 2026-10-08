@@ -6,6 +6,26 @@
 
 后续未发布改动记录在这里。
 
+## [2.4.0] - 2026-10-08
+
+### Added
+
+- 增加可选 MyBatis/MyBatis-Plus 附录，覆盖 Mapper 文件格式、XML 映射与列清单、BaseMapper、IService/ServiceImpl 选型、自定义 SQL、框架插件和按范围验证，不依赖特定 IDE 或代码生成插件。
+- 收录 MyBatis/MyBatis-Plus 官方文档、MP 3.5.9 源码及参考项目的映射与 Service 研究记录。
+
+### Changed
+
+- 后端入口、Spring Boot 附录和项目画像接入持久化附录；明确可复用框架 CRUD，同时保留业务用例边界。
+- 文件归类和 SDD 规则区分持续生成文件与一次生成后人工维护的脚手架，重新生成时保留自定义 SQL 和业务代码。
+- README 增加选读入口、采用步骤和本版安装标签。
+
+### Compatibility and upgrade
+
+- 本版新增可选技术附录，保留已有目录、API 契约、事务与验证要求，SDD 仍默认简单模式；不要求更换持久化框架、依赖版本或重排业务代码。
+- 从 v2.3.0 升级时合并规范入口与完整后端附录；使用 MyBatis/MyBatis-Plus 的项目在 `selected_appendices` 中选择新附录并登记实际约定。其他项目不需启用。
+- 使用生成器的项目同步文件归类规则和 SDD Skill，并声明文件维护方式；现有持续生成的 API 客户端仍通过生成器更新，不因新增脚手架说明改为手工维护。
+- 受影响入口：README、后端规范选择入口、通用核心的框架复用说明、Spring Boot 附录、后端项目画像、文件归类规范与 SDD Skill；新增 `backend/frameworks/mybatis-plus.md`。
+
 ## [2.3.0] - 2026-09-30
 
 ### Changed

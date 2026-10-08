@@ -7,7 +7,7 @@
 - 启动类位于根包，不使用 default package；业务包优先按能力组织。
 - Spring Bean 使用构造器注入，依赖字段为 `final`；不使用字段注入。
 - 单构造器通常不需要 `@Autowired`；多个实现使用 `@Qualifier`、`@Primary` 或明确 Bean 名称。`@Resource` 默认按名称解析，只在项目需要按名选择 Bean 时使用。
-- 只有真实替换实现、跨模块端口或外部适配价值时定义接口，不机械创建 `Service` + `ServiceImpl`。
+- 接口用于真实替换实现、跨模块端口、外部适配或复用框架契约，不机械创建纯转发的 `Service` + `ServiceImpl`。MyBatis-Plus 的通用 Service 选择见 [持久化附录](mybatis-plus.md)，不要求所有业务 Service 统一继承或统一禁用。
 - 配置、适配器和持久化实现保持在模块内部，公开包只放稳定接口和共享契约。
 - 可以使用 Spring Modulith 或 ArchUnit 验证模块无环、公开 API 和允许依赖。
 
@@ -86,7 +86,7 @@ public enum ErrorCode {
 
 ## 八、数据访问与测试
 
-- JDBC、JPA、MyBatis 等持久化选择写入项目画像，只读取对应项目附录或约定。
+- JDBC、JPA、MyBatis 等持久化选择写入项目画像；使用 MyBatis/MyBatis-Plus 时选读 [持久化附录](mybatis-plus.md)，其他技术沿用对应项目约定。
 - 动态 SQL 标识符来自服务端白名单，值始终参数化。
 - `@SpringBootTest` 用于需要完整容器的集成行为，不替代快速单元和 slice 测试。
 - Controller 测试覆盖校验、认证、授权、状态码、业务码和内容类型。
