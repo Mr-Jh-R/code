@@ -10,9 +10,11 @@
 | --- | --- | --- |
 | 新建文件或选择输出目录 | [文件与目录规范](conventions/repository-layout.md) | 开发者和 AI |
 | 开始任务、选择分支、整合或发布 | [Git 协作规范](conventions/git-workflow.md) | 开发者和 AI |
+| 实现后的检查、修复复查与放行 | [通用质量门禁](conventions/quality-gates.md) | 开发者和 AI，按风险选择检查 |
 | 给具体项目接入这些规则 | [项目工作流模板](conventions/project-workflow.template.md)和下方接入步骤 | 项目维护者和 AI |
 | 开发功能或处理复杂变更 | [SDD Skill](skills/sdd-workflow/SKILL.md) | AI 执行，开发者核对产物 |
 | 审查或编写 API 调用文档 | [API 文档 Skill](skills/api-contract-docs/SKILL.md) | 开发者可直接阅读，AI 可加载执行 |
+| 专项代码规范检查 | [standards-check Skill](skills/standards-check/SKILL.md) | 按需调用，默认只读、单 Agent |
 | 后端实现、设计与审查 | [后端入口](conventions/backend-conventions.md) | 按项目画像选择技术附录 |
 | Mapper 映射、SQL 与 CRUD 复用 | [MyBatis / MyBatis-Plus 附录](conventions/backend/frameworks/mybatis-plus.md) | 仅采用该技术的项目选读 |
 | 前端实现、设计与审查 | [前端入口](conventions/frontend-conventions.md) | 按目标包选择 React 或 Vue |
@@ -25,13 +27,13 @@
 
 ### 1. 选择来源版本
 
-采用本规范包时固定 release tag，当前版本为 v2.4.0：
+采用已发布规范包时固定 release tag，当前已发布版本为 v2.4.0：
 
 ```bash
 git clone --branch v2.4.0 --depth 1 https://github.com/Mr-Jh-R/code.git ../code-standards
 ```
 
-v2.4.0 在原有前后端规范、Git 规范和默认简单模式的 SDD 基础上，增加 MyBatis/MyBatis-Plus 可选附录，并区分持续生成文件与人工维护脚手架。下方接入示例可直接使用这个版本；升级说明见 [CHANGELOG](CHANGELOG.md)。
+v2.4.0 包含前后端规范、Git 规范、默认简单模式的 SDD 和 MyBatis/MyBatis-Plus 附录。**本页新增的质量门禁、standards-check Skill 和对应接入示例在 [Unreleased](CHANGELOG.md)，不包含在 v2.4.0 标签中。** 采用这些新增内容时使用包含它们的已审阅提交/工作副本，记录实际 SHA；后续发布后再固定包含它们的标签。下方完整安装命令会在来源缺少文件时停止，不能直接用于旧标签。
 
 在项目约定中记录来源 URL 和实际 tag/SHA；采用未提交草稿时明确注明草稿状态。规则在目标项目保存为本地副本，日常开发不依赖网络或可变的远端 `main`。
 
@@ -44,8 +46,9 @@ v2.4.0 在原有前后端规范、Git 规范和默认简单模式的 SDD 基础�
 ```powershell
 $standardsRepo = "..\code-standards"
 $skillRoot = ".agents\skills"  # Claude Code 改为 .claude\skills
-$ruleNames = @("repository-layout.md", "git-workflow.md", "project-workflow.template.md")
+$ruleNames = @("repository-layout.md", "git-workflow.md", "quality-gates.md", "project-workflow.template.md")
 $skillNames = @("sdd-workflow", "api-contract-docs")  # 删除不需要的 Skill
+# 需要专项规范检查时，向 $skillNames 追加 "standards-check"
 
 # 在写入前核对整个安装范围。
 $copies = @(@{ Source = "$standardsRepo\LICENSE"; Target = "docs\conventions\standards-LICENSE" })
@@ -72,8 +75,9 @@ foreach ($entry in $copies) {
 set -eu
 standards_repo=../code-standards
 skill_root=.agents/skills  # Claude Code 改为 .claude/skills
-rule_names=(repository-layout.md git-workflow.md project-workflow.template.md)
+rule_names=(repository-layout.md git-workflow.md quality-gates.md project-workflow.template.md)
 skill_names=(sdd-workflow api-contract-docs)  # 删除不需要的 Skill
+# 需要专项规范检查时，向 skill_names 追加 standards-check
 sources=("$standards_repo/LICENSE")
 targets=(docs/conventions/standards-LICENSE)
 for name in "${rule_names[@]}"; do
@@ -101,6 +105,8 @@ done
 
 把复制的模板另存为 `docs/conventions/project-workflow.md` 后填写，或将字段合入已有项目约定。至少明确集成基线、权威验证入口、采用来源，以及已安装的规范/Skill 路径。API 文档入口和发布约定仅在项目需要时填写。模板是可读文档，不是自动生效的工具配置。
 
+在模板的“检查与证据”填写适用范围、实际命令及工作目录、必需项和 CI 入口；已有后端画像或 CI 配置直接引用即可。Git 规则与模板引用通用质量门禁，升级时一起复制 `quality-gates.md`，不需要新的配置文件或万能检查脚本。
+
 技术规范按实际栈补充：
 
 | 需要 | 从本仓库复制到目标 `docs/conventions/` | 如何选择 |
@@ -126,12 +132,23 @@ done
 .agents/skills/sdd-workflow/SKILL.md；遵循用户选择的标准或简单模式。
 审查、编写或更新接口文档，使用 .agents/skills/api-contract-docs/SKILL.md。
 
+实现后按 docs/conventions/quality-gates.md 和项目检查命令单独核对差异，
+按风险选择范围；修复后复查受影响项，已有有效结果可复用。
+
 后端任务读取 docs/conventions/backend-conventions.md 和
 docs/conventions/backend-project-profile.md，按画像选择附录。
 前端任务读取 docs/conventions/frontend-conventions.md，按目标包选择 React/Vue。
 ```
 
 Claude Code 使用 `.claude/skills/`：把指针中的路径替换为实际位置，在 `CLAUDE.md` 中声明，或通过 `CLAUDE.md` 引用共同维护的 `AGENTS.md`。同时使用多个工具时，声明同一份规范来源；若工具需要不同位置的技能副本，由同一版本同步更新。
+
+仅在已安装可选 `standards-check` 时，再加入以下指针，并按工具替换路径：
+
+```text
+用户要求规范专项审查、发布前规范核对或项目明确要求时，使用
+.agents/skills/standards-check/SKILL.md。默认只读；任务已授权修复时才修改。
+普通 SDD 任务不强制调用此 Skill，不重复执行已有有效的同范围检查。
+```
 
 面向 AI 的接入请求示例：
 
@@ -155,6 +172,7 @@ AGENTS/CLAUDE、技术栈、分支约定和已安装技能。复用已有权威�
 | SDD Skill | 根据范围组织探索、规格、任务、实现、验证和归档 |
 | OpenSpec | 管理 proposal、specs、design、tasks 及变更状态，不代替代码验证 |
 | API 文档 Skill | 依据确认的契约版本维护调用文档，纯文档审查可独立使用 |
+| 质量门禁 / standards-check | 通用检查闭环与可选专项审查，共用项目实际检查命令 |
 | Superpowers / subagent | 可选的执行方式，不是 SDD 或 OpenSpec 的必需依赖 |
 
 采用 OpenSpec 的项目按其 [官方安装说明](https://github.com/Fission-AI/OpenSpec) 安装、初始化，并通过当前 `openspec --help` 确认命令。只安装 Git/目录规则或只维护接口文档时不需要 OpenSpec。
@@ -175,6 +193,31 @@ AGENTS/CLAUDE、技术栈、分支约定和已安装技能。复用已有权威�
 
 可选脚本支持本地 OpenAPI 3.x JSON 与 Markdown，只提供机械核对线索，不判断线上行为；用法和限制见 [Skill](skills/api-contract-docs/SKILL.md)。
 
+### 规范检查：日常轻量，专项按需
+
+日常流程是“读取适用规范 → 实现 → 自动检查 → 单独审查差异 → 必要修复与复查”。[质量门禁](conventions/quality-gates.md) 定义范围与完成条件：文档只做相关检查，普通代码检查受影响模块，权限/事务/数据库等变化增加专项证据。简单 SDD 也执行，默认主 Agent 串行完成，不强制全量构建、多代理或另写报告。
+
+要做专项审查时选择安装 [standards-check](skills/standards-check/SKILL.md)，例如：
+
+```text
+使用 standards-check 检查本次改动，默认只读。
+```
+
+```text
+使用 standards-check 核对我指定的发布提交；检查目标项目约定的必需项，
+列出规则依据、文件位置、影响及未验证部分。
+```
+
+```text
+使用 standards-check 检查并修复本任务范围内的确定违规，复查受影响部分。
+```
+
+检查工具不能机械执行所有 Markdown 规则：格式、类型、测试用现有工具；事务边界、授权与组件复用等结合代码证据审查。已有检查需能对应当前源码、配置、依赖和环境才可复用，修改后不能沿用已失效的“通过”。未配置、执行异常或未执行的必需项要报告为缺口。
+
+手动命令与 CI 优先复用项目已有的构建/检查入口；没有 Skill 加载功能的工具也可直接阅读检查规范和 Skill 步骤执行。Git `pre-push` 或 AI hook 仅是可选触发适配，调用同一命令并反馈结果；采用前核对具体工具支持，避免每次编辑都跑重检查和递归触发。本包不自动安装任何 hook。
+
+需要强制阻止不合格版本合并或发布时，使用方还要配置平台必需状态检查、分支保护及发布流水线前置条件。本地 hook 可被跳过，push 后 CI 失败也不会撤销已推送提交或标签；复制本包不等于已开启远端门禁。
+
 ## 维护、验证和升级
 
 本仓库使用 Python 标准库自检，无需业务构建工具：
@@ -186,6 +229,8 @@ git diff --check
 ```
 
 第一条检查 Markdown 链接、围栏、空白、版本和 Skill frontmatter；第二条验证 API 核对脚本的路由匹配和报告行为。CI 运行同样的文档与脚本检查，机械通过不代替规范内容审查。
+
+这组命令验证的是规范包自身，不能证明使用方的 Java、前端或其他业务代码合规。使用方应按项目工作流约定接入其实际工具和人工/AI 审查。
 
 版本采用 [Semantic Versioning](https://semver.org/)。版本变化记录在 [CHANGELOG](CHANGELOG.md)，后续未发布改动另记为 Unreleased；发布流程见 [VERSIONING](VERSIONING.md)。使用方升级时审查差异、保留本地项目事实、同步入口并运行相关验证。
 
