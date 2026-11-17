@@ -17,6 +17,7 @@
 | 专项代码规范检查 | [standards-check Skill](skills/standards-check/SKILL.md) | 按需调用，默认只读、单 Agent |
 | 检查时选版本、离线读取与更新 | [本地版本指引](skills/standards-check/references/local-versions.md) | 用户级共享规范库，也支持项目级安装 |
 | 后端实现、设计与审查 | [后端入口](conventions/backend-conventions.md) | 按项目画像选择技术附录 |
+| Python 开发与统一响应 | [Python 附录](conventions/backend/languages/python.md)、[FastAPI 附录](conventions/backend/frameworks/fastapi.md) | Python 项目读取语言规则，FastAPI 项目再读适配实现 |
 | Mapper 映射、SQL 与 CRUD 复用 | [MyBatis / MyBatis-Plus 附录](conventions/backend/frameworks/mybatis-plus.md) | 仅采用该技术的项目选读 |
 | 前端实现、设计与审查 | [前端入口](conventions/frontend-conventions.md) | 按目标包选择 React 或 Vue |
 
@@ -121,6 +122,10 @@ done
 
 使用 MyBatis/MyBatis-Plus 的项目，在后端画像的 `selected_appendices` 中加入 `docs/conventions/backend/frameworks/mybatis-plus.md`。该附录直接规定 Mapper 命名、资源位置、XML 结构和映射引用，人和 AI 均可编写，不需要特定 IDE 插件；普通 CRUD 可复用 `BaseMapper` 或 `IService/ServiceImpl`，复杂业务保留用例边界。XML 按实际需要创建；采用其他持久化技术的项目无需选择它。
 
+Python 项目选择 `docs/conventions/backend/languages/python.md`，FastAPI 项目再选择 `docs/conventions/backend/frameworks/fastapi.md`。普通 JSON 业务响应为 `code/message/data`，整数 `code=0` 成功、非零失败；`throw_if` 抛业务异常，处理器统一转换并保留真实 HTTP 状态。文件、流与 204 按协议处理。语言规则不强制所有项目安装 FastAPI；可运行示例和测试在 `conventions/backend/examples/python/`，随完整后端规范包复制，按需采用。
+
+Python/FastAPI 附录属于 Unreleased，不在 v2.4.0 或更早的本地快照中；安装新快照后才能按该版本检查。已经公开的不同 API 契约按项目兼容方案演进，不因复制规范自动改变。
+
 ### 4. 在 AI 工具入口加入指针
 
 下例适用于已按上面路径安装两个 Skill 的 Codex 项目。**追加到已有 `AGENTS.md`，按实际安装情况删除未采用项**。项目已有入口优先使用，避免维护两份相同正文。
@@ -223,7 +228,7 @@ python <已安装Skill>/scripts/standards_store.py default --version <版本ID>
 
 普通检查不联网；更新是独立操作。`updates` 仅查询 GitHub 稳定标签，不下载、不切换默认；选择后再获取精确 tag/SHA 安装，保留旧版。离线时只能确认本地可用版本，不能声称已核对上游最新。命令、失败处理和安装步骤见 [本地版本指引](skills/standards-check/references/local-versions.md)。
 
-版本选定后按 [阅读指引](skills/standards-check/references/reading-guide.md) 读取正文：React 读前端入口和 React 文件；Python + MySQL 读跨语言后端核心和 MySQL，说明缺少 Python 专用附录但不套 Java。当前旧快照仍要求完整读取核心；本次没有重写其完整读取要求。脚本 `read-plan` 提供已验证路径，不代替 AI 读取内容。
+版本选定后按 [阅读指引](skills/standards-check/references/reading-guide.md) 读取正文：React 读前端入口和 React 文件；Python + MySQL 读跨语言核心、Python（所选版本存在时）和 MySQL，FastAPI 按实际技术再读框架附录。旧快照缺少 Python 时报告缺项，不套 Java，也不悄悄混入新版规则。脚本 `read-plan` 提供已验证路径，不代替 AI 读取内容。
 
 要做专项审查时选择安装 [standards-check](skills/standards-check/SKILL.md)，例如：
 
@@ -260,6 +265,15 @@ git diff --check
 第一条检查 Markdown 链接、围栏、空白、版本和 Skill frontmatter；第二条验证 API 核对脚本的路由匹配和报告行为。CI 运行同样的文档与脚本检查，机械通过不代替规范内容审查。
 
 本地规范库测试在临时 Git 仓库验证固定提交导出、版本选择、离线行为、完整性和技术栈读取路径，不访问上游或用户实际版本库。
+
+Python/FastAPI 参考实现使用独立依赖环境进行 HTTP 契约测试：
+
+```bash
+python -m pip install -r conventions/backend/examples/python/requirements.txt
+python -B -m unittest discover -s conventions/backend/examples/python -p "test_*.py"
+```
+
+这组测试仅证明参考实现的响应、异常与序列化行为，不连接业务数据库、不替代使用方权限/事务测试。示例依赖不加入纯文档校验的运行环境；CI 用独立任务验证。
 
 这组命令验证的是规范包自身，不能证明使用方的 Java、前端或其他业务代码合规。使用方应按项目工作流约定接入其实际工具和人工/AI 审查。
 

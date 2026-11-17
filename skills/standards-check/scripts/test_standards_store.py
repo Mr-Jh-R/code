@@ -136,6 +136,33 @@ class StoreTests(unittest.TestCase):
         self.assertNotIn("java.md", names)
         self.assertEqual(result["missing_appendices"], ["backend/languages/python.md"])
 
+    def test_new_python_snapshot_routes_to_its_own_appendix_without_changing_old_release(self):
+        old = store.install(self.cache, self.repo, "v2.4.0")
+        additions = {
+            "conventions/backend/languages/python.md": "Python numeric response contract\n",
+            "conventions/backend/frameworks/fastapi.md": "FastAPI error adapters\n",
+            "conventions/backend/examples/python/fastapi_contract.py": "# runnable reference\n",
+        }
+        for name, content in additions.items():
+            path = self.repo / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding="utf-8")
+        self.run_git("add", ".")
+        self.run_git("commit", "-m", "add Python appendix")
+        new = store.install(self.cache, self.repo, self.run_git("rev-parse", "HEAD"))
+        with patch.object(store.subprocess, "run", side_effect=AssertionError("Offline read required")):
+            plan = store.reading_plan(new, backend=True, language="python", databases=["mysql"])
+            old_plan = store.reading_plan(old, backend=True, language="python")
+        names = [Path(item["path"]).name for item in plan["files"]]
+        self.assertIn("python.md", names)
+        self.assertIn("core.md", names)
+        self.assertIn("mysql.md", names)
+        self.assertNotIn("java.md", names)
+        self.assertEqual(plan["missing_appendices"], [])
+        self.assertEqual(old_plan["missing_appendices"], ["backend/languages/python.md"])
+        for name, content in additions.items():
+            self.assertEqual((Path(new["root"]) / name).read_text(encoding="utf-8"), content)
+
     def test_updates_sorts_stable_tags_and_peels_annotated_tag(self):
         output = ("a" * 40 + "\trefs/tags/v2.9.0\n" + "b" * 40 + "\trefs/tags/v2.10.0\n"
                   + "c" * 40 + "\trefs/tags/v2.10.0^{}\n" + "d" * 40 + "\trefs/tags/v3.0.0-rc1\n")

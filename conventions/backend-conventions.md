@@ -11,7 +11,9 @@
 3. 设计新模块、引入抽象或重构复杂流程时，读取 [`backend/design-patterns.md`](backend/design-patterns.md)。
 4. 只读取项目画像选中的技术附录：
    - Java：[`backend/languages/java.md`](backend/languages/java.md)
+   - Python：[`backend/languages/python.md`](backend/languages/python.md)
    - Spring Boot：[`backend/frameworks/spring-boot.md`](backend/frameworks/spring-boot.md)
+   - FastAPI：[`backend/frameworks/fastapi.md`](backend/frameworks/fastapi.md)
    - MyBatis / MyBatis-Plus：[`backend/frameworks/mybatis-plus.md`](backend/frameworks/mybatis-plus.md)
    - MySQL：[`backend/databases/mysql.md`](backend/databases/mysql.md)
    - PostgreSQL：[`backend/databases/postgresql.md`](backend/databases/postgresql.md)

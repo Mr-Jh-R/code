@@ -18,6 +18,8 @@
 | 其他前端技术 | `frontend-conventions.md` 中跨框架原则 + 项目生态配置；说明无专用附录 |
 | 后端（任何语言） | `backend-conventions.md` + `backend/core.md` + 项目补充约定 |
 | Java | 追加 `backend/languages/java.md` |
+| Python | 选定版本存在时追加 `backend/languages/python.md`，包括数字响应码与 Python 特有约束 |
+| FastAPI | 选定版本存在时追加 `backend/frameworks/fastapi.md`；框架示例与测试按需查看 |
 | Spring Boot | 追加 `backend/frameworks/spring-boot.md` |
 | MyBatis / MyBatis-Plus | 追加 `backend/frameworks/mybatis-plus.md`，按选择版本实际内容使用 |
 | MySQL / PostgreSQL | 追加对应 `backend/databases/mysql.md` / `postgresql.md`，与语言独立选择 |
@@ -37,7 +39,7 @@ python <脚本> read-plan --version <版本ID> --backend --language python --dat
 
 ## 没有专用语言规则时
 
-例如 Python + MySQL：读跨语言后端核心、MySQL 附录和项目 `pyproject.toml` 中 Ruff/格式化/测试约定；不读 Java、Spring、MyBatis。不要伪造 Python 附录，也不要为了统一规范新增 Java 的包结构、构造器注解或 ServiceImpl 约束。
+例如 Python + MySQL：读跨语言后端核心、MySQL 附录及选定版本存在的 Python 附录，再核对项目 `pyproject.toml` 中 Ruff/格式化/测试约定；FastAPI 项目额外读取其框架附录。旧版本没有 Python/FastAPI 附录时明确报告缺项，不混用其他版本的正文；不读 Java、Spring、MyBatis，也不套用它们的包结构、构造器注解或 ServiceImpl 约束。
 
 没有 Python 专用附录不妨碍核对权限、输入输出、错误、资源、数据一致性等共同原则；语言细节使用项目已有约定并说明覆盖范围。规范示例中的 Umi、Ant Design 等只在项目已采用且满足该规则条件时适用。
 

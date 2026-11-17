@@ -66,6 +66,7 @@ deployment:
 - 认证、授权和内部接口策略：待填写。
 - 敏感数据、日志和保留期策略：待填写。
 - 数据库 schema、迁移和本地集成验证：待填写。
+- 使用 Python 时：在 `selected_appendices` 选择 `docs/conventions/backend/languages/python.md`；FastAPI 项目再选择 `docs/conventions/backend/frameworks/fastapi.md`。记录 Python/框架版本、格式/类型/测试命令及数字响应码约定（成功 0、失败非零并保留 HTTP 状态）；已有契约差异另记兼容策略。未使用时删除本项。
 - 使用 MyBatis/MyBatis-Plus 时：在 `selected_appendices` 添加 `docs/conventions/backend/frameworks/mybatis-plus.md`，记录基础 CRUD 与业务用例的边界、XML/自动映射及插件验证约定；未使用时删除本项。
 - 使用代码生成器时：记录持续生成或人工维护的文件范围、模板/输入来源、输出目录及覆盖策略；未使用时删除本项。
 
