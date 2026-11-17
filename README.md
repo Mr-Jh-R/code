@@ -15,6 +15,7 @@
 | 开发功能或处理复杂变更 | [SDD Skill](skills/sdd-workflow/SKILL.md) | AI 执行，开发者核对产物 |
 | 审查或编写 API 调用文档 | [API 文档 Skill](skills/api-contract-docs/SKILL.md) | 开发者可直接阅读，AI 可加载执行 |
 | 专项代码规范检查 | [standards-check Skill](skills/standards-check/SKILL.md) | 按需调用，默认只读、单 Agent |
+| 检查时选版本、离线读取与更新 | [本地版本指引](skills/standards-check/references/local-versions.md) | 用户级共享规范库，也支持项目级安装 |
 | 后端实现、设计与审查 | [后端入口](conventions/backend-conventions.md) | 按项目画像选择技术附录 |
 | Mapper 映射、SQL 与 CRUD 复用 | [MyBatis / MyBatis-Plus 附录](conventions/backend/frameworks/mybatis-plus.md) | 仅采用该技术的项目选读 |
 | 前端实现、设计与审查 | [前端入口](conventions/frontend-conventions.md) | 按目标包选择 React 或 Vue |
@@ -22,6 +23,8 @@
 本仓库的 `conventions/` 是规范源文件，`skills/` 是可复制的完整技能包，`docs/research/` 保存研究依据，`scripts/` 与 `.github/workflows/` 负责自检。使用方无需照搬本仓库的发布方式或目录树。
 
 ## 快速接入一个项目
+
+若只是希望多个项目共享一套规范检查能力，可先用下方“用户级安装与离线规范”方式；无需在每个项目复制规范。以下项目级接入适用于团队希望将固定规则和工具入口随项目提交的情况，两种方式按需选择，不要求同时安装同名 Skill。
 
 接入分四步：**选版本 → 复制需要的文件 → 填写项目事实 → 在工具入口引用**。已有同用途规范、Skill 或入口时，核对差异后合并，保留项目特有规则；不要直接覆盖。
 
@@ -197,6 +200,31 @@ AGENTS/CLAUDE、技术栈、分支约定和已安装技能。复用已有权威�
 
 日常流程是“读取适用规范 → 实现 → 自动检查 → 单独审查差异 → 必要修复与复查”。[质量门禁](conventions/quality-gates.md) 定义范围与完成条件：文档只做相关检查，普通代码检查受影响模块，权限/事务/数据库等变化增加专项证据。简单 SDD 也执行，默认主 Agent 串行完成，不强制全量构建、多代理或另写报告。
 
+### 用户级安装与离线规范（Unreleased）
+
+完整复制 `skills/standards-check/` 到工具实际发现的用户 Skill 目录，例如当前 Codex 环境的 `$CODEX_HOME/skills/standards-check`；已有副本先备份并核对差异，不能覆盖用户定制。此目录包含 SKILL、读取指引和版本脚本；安装来源与文件哈希可记入安装目录的 `installation.json`。脚本需要 Python 3.10+，从 Git 安装快照需要 Git。
+
+再从已核对来源的本地规范仓库安装一份完整规范快照。替换占位符后执行：
+
+```text
+python <已安装Skill>/scripts/standards_store.py install --repo <规范仓库目录> --ref v2.4.0
+python <已安装Skill>/scripts/standards_store.py list
+```
+
+规范快照默认放在 `$CODEX_HOME/standards/code/versions/`（未设 CODEX_HOME 时为 `~/.codex/standards/code/versions/`）；可用子命令前的 `--store <目录>` 配置其他工具或项目级版本库。快照包含 conventions 全部正文及来源/commit/逐文件哈希，不需要目标项目已经有 React 或后端规范。
+
+Skill 的新流程与规范版本分开：新版 Skill 可以检查 v2.4.0 的规则；v2.4.0 本身不包含新的质量门禁。若明确使用未发布 main，先解析到完整 SHA，再以 `--ref <完整SHA>` 安装为 `snapshot-<SHA>`。不把工作树改动或开发快照冒充已发布 tag。
+
+首次无明确版本时，Skill 展示已安装版本供选择（推荐稳定发布版），随后固定来源与 SHA。用户本次选择、任务已确认选择、项目固定版本、用户默认依次优先；项目来源和提交也须一致。仅在用户明确要求长期默认时执行：
+
+```text
+python <已安装Skill>/scripts/standards_store.py default --version <版本ID>
+```
+
+普通检查不联网；更新是独立操作。`updates` 仅查询 GitHub 稳定标签，不下载、不切换默认；选择后再获取精确 tag/SHA 安装，保留旧版。离线时只能确认本地可用版本，不能声称已核对上游最新。命令、失败处理和安装步骤见 [本地版本指引](skills/standards-check/references/local-versions.md)。
+
+版本选定后按 [阅读指引](skills/standards-check/references/reading-guide.md) 读取正文：React 读前端入口和 React 文件；Python + MySQL 读跨语言后端核心和 MySQL，说明缺少 Python 专用附录但不套 Java。当前旧快照仍要求完整读取核心；本次没有重写其完整读取要求。脚本 `read-plan` 提供已验证路径，不代替 AI 读取内容。
+
 要做专项审查时选择安装 [standards-check](skills/standards-check/SKILL.md)，例如：
 
 ```text
@@ -225,10 +253,13 @@ AGENTS/CLAUDE、技术栈、分支约定和已安装技能。复用已有权威�
 ```bash
 python scripts/validate_repository.py
 python -B -m unittest discover -s skills/api-contract-docs/scripts -p "test_*.py"
+python -B -m unittest discover -s skills/standards-check/scripts -p "test_*.py"
 git diff --check
 ```
 
 第一条检查 Markdown 链接、围栏、空白、版本和 Skill frontmatter；第二条验证 API 核对脚本的路由匹配和报告行为。CI 运行同样的文档与脚本检查，机械通过不代替规范内容审查。
+
+本地规范库测试在临时 Git 仓库验证固定提交导出、版本选择、离线行为、完整性和技术栈读取路径，不访问上游或用户实际版本库。
 
 这组命令验证的是规范包自身，不能证明使用方的 Java、前端或其他业务代码合规。使用方应按项目工作流约定接入其实际工具和人工/AI 审查。
 

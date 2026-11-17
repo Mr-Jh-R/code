@@ -21,3 +21,5 @@ jobs:
         run: python scripts/validate_repository.py
       - name: Validate API audit helper
         run: python -B -m unittest discover -s skills/api-contract-docs/scripts -p "test_*.py"
+      - name: Validate local standards store
+        run: python -B -m unittest discover -s skills/standards-check/scripts -p "test_*.py"
