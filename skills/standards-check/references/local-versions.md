@@ -36,7 +36,7 @@ python <脚本> verify --version <版本ID>
 ### 从本地已知来源安装
 
 ```text
-python <脚本> install --repo <规范仓库目录> --ref v2.5.0
+python <脚本> install --repo <规范仓库目录> --ref v2.5.1
 python <脚本> install --repo <规范仓库目录> --ref <完整40位提交SHA>
 ```
 

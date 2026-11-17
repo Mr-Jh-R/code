@@ -31,13 +31,13 @@
 
 ### 1. 选择来源版本
 
-采用已发布规范包时固定 release tag，当前已发布版本为 v2.5.0：
+采用已发布规范包时固定 release tag，当前已发布版本为 v2.5.1：
 
 ```bash
-git clone --branch v2.5.0 --depth 1 https://github.com/Mr-Jh-R/code.git ../code-standards
+git clone --branch v2.5.1 --depth 1 https://github.com/Mr-Jh-R/code.git ../code-standards
 ```
 
-v2.5.0 包含前后端规范、Git 规范、默认简单模式的 SDD、MyBatis/MyBatis-Plus 与 Python/FastAPI 附录，以及质量门禁、standards-check Skill 和离线规范版本管理。升级说明见 [CHANGELOG](CHANGELOG.md)。下方安装命令对应本版，来源缺少文件时会停止，不能直接用于旧标签。
+v2.5.1 包含前后端规范、Git 规范、默认简单模式的 SDD、MyBatis/MyBatis-Plus 与 Python/FastAPI 附录，以及质量门禁、standards-check Skill、离线规范版本管理和项目升级指引。升级说明见 [CHANGELOG](CHANGELOG.md)。下方安装命令对应本版，来源缺少文件时会停止，不能直接用于旧标签。
 
 在项目约定中记录来源 URL 和实际 tag/SHA；采用未提交草稿时明确注明草稿状态。规则在目标项目保存为本地副本，日常开发不依赖网络或可变的远端 `main`。
 
@@ -212,7 +212,7 @@ AGENTS/CLAUDE、技术栈、分支约定和已安装技能。复用已有权威�
 再从已核对来源的本地规范仓库安装一份完整规范快照。替换占位符后执行：
 
 ```text
-python <已安装Skill>/scripts/standards_store.py install --repo <规范仓库目录> --ref v2.5.0
+python <已安装Skill>/scripts/standards_store.py install --repo <规范仓库目录> --ref v2.5.1
 python <已安装Skill>/scripts/standards_store.py list
 ```
 
@@ -228,7 +228,7 @@ python <已安装Skill>/scripts/standards_store.py default --version <版本ID>
 
 普通检查不联网；更新是独立操作。`updates` 仅查询 GitHub 稳定标签，不下载、不切换默认；选择后再获取精确 tag/SHA 安装，保留旧版。离线时只能确认本地可用版本，不能声称已核对上游最新。命令、失败处理和安装步骤见 [本地版本指引](skills/standards-check/references/local-versions.md)。
 
-已有项目升级按 [项目升级指引](skills/standards-check/references/project-upgrade.md) 执行：安装新版 → 只读预检 → 处理适用差异 → 验证 → 固定项目版本。全局保留多个版本，各项目独立选择；试用新版检查不永久切换项目，修改全局默认也不覆盖项目固定版本。定制过规范正文的项目按旧原文、项目现状与新原文三方合并；旧基线不明时先核实。该细化流程属于 v2.5.0 之后的 Unreleased Skill 更新，不修改已发布的 v2.5.0 快照。
+已有项目升级按 [项目升级指引](skills/standards-check/references/project-upgrade.md) 执行：安装新版 → 只读预检 → 处理适用差异 → 验证 → 固定项目版本。全局保留多个版本，各项目独立选择；试用新版检查不永久切换项目，修改全局默认也不覆盖项目固定版本。定制过规范正文的项目按旧原文、项目现状与新原文三方合并；旧基线不明时先核实。该细化流程从 v2.5.1 的 Skill 开始提供，不修改已发布的 v2.5.0 快照。
 
 版本选定后按 [阅读指引](skills/standards-check/references/reading-guide.md) 读取正文：React 读前端入口和 React 文件；Python + MySQL 读跨语言核心、Python（所选版本存在时）和 MySQL，FastAPI 按实际技术再读框架附录。旧快照缺少 Python 时报告缺项，不套 Java，也不悄悄混入新版规则。脚本 `read-plan` 提供已验证路径，不代替 AI 读取内容。
 
