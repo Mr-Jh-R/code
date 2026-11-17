@@ -31,13 +31,13 @@
 
 ### 1. 选择来源版本
 
-采用已发布规范包时固定 release tag，当前已发布版本为 v2.4.0：
+采用已发布规范包时固定 release tag，当前已发布版本为 v2.5.0：
 
 ```bash
-git clone --branch v2.4.0 --depth 1 https://github.com/Mr-Jh-R/code.git ../code-standards
+git clone --branch v2.5.0 --depth 1 https://github.com/Mr-Jh-R/code.git ../code-standards
 ```
 
-v2.4.0 包含前后端规范、Git 规范、默认简单模式的 SDD 和 MyBatis/MyBatis-Plus 附录。**本页新增的质量门禁、standards-check Skill 和对应接入示例在 [Unreleased](CHANGELOG.md)，不包含在 v2.4.0 标签中。** 采用这些新增内容时使用包含它们的已审阅提交/工作副本，记录实际 SHA；后续发布后再固定包含它们的标签。下方完整安装命令会在来源缺少文件时停止，不能直接用于旧标签。
+v2.5.0 包含前后端规范、Git 规范、默认简单模式的 SDD、MyBatis/MyBatis-Plus 与 Python/FastAPI 附录，以及质量门禁、standards-check Skill 和离线规范版本管理。升级说明见 [CHANGELOG](CHANGELOG.md)。下方安装命令对应本版，来源缺少文件时会停止，不能直接用于旧标签。
 
 在项目约定中记录来源 URL 和实际 tag/SHA；采用未提交草稿时明确注明草稿状态。规则在目标项目保存为本地副本，日常开发不依赖网络或可变的远端 `main`。
 
@@ -124,7 +124,7 @@ done
 
 Python 项目选择 `docs/conventions/backend/languages/python.md`，FastAPI 项目再选择 `docs/conventions/backend/frameworks/fastapi.md`。普通 JSON 业务响应为 `code/message/data`，整数 `code=0` 成功、非零失败；`throw_if` 抛业务异常，处理器统一转换并保留真实 HTTP 状态。文件、流与 204 按协议处理。语言规则不强制所有项目安装 FastAPI；可运行示例和测试在 `conventions/backend/examples/python/`，随完整后端规范包复制，按需采用。
 
-Python/FastAPI 附录属于 Unreleased，不在 v2.4.0 或更早的本地快照中；安装新快照后才能按该版本检查。已经公开的不同 API 契约按项目兼容方案演进，不因复制规范自动改变。
+Python/FastAPI 附录从 v2.5.0 开始提供，不在 v2.4.0 或更早的本地快照中；安装并选择包含它们的版本后才能检查。已经公开的不同 API 契约按项目兼容方案演进，不因复制规范自动改变。
 
 ### 4. 在 AI 工具入口加入指针
 
@@ -205,14 +205,14 @@ AGENTS/CLAUDE、技术栈、分支约定和已安装技能。复用已有权威�
 
 日常流程是“读取适用规范 → 实现 → 自动检查 → 单独审查差异 → 必要修复与复查”。[质量门禁](conventions/quality-gates.md) 定义范围与完成条件：文档只做相关检查，普通代码检查受影响模块，权限/事务/数据库等变化增加专项证据。简单 SDD 也执行，默认主 Agent 串行完成，不强制全量构建、多代理或另写报告。
 
-### 用户级安装与离线规范（Unreleased）
+### 用户级安装与离线规范
 
 完整复制 `skills/standards-check/` 到工具实际发现的用户 Skill 目录，例如当前 Codex 环境的 `$CODEX_HOME/skills/standards-check`；已有副本先备份并核对差异，不能覆盖用户定制。此目录包含 SKILL、读取指引和版本脚本；安装来源与文件哈希可记入安装目录的 `installation.json`。脚本需要 Python 3.10+，从 Git 安装快照需要 Git。
 
 再从已核对来源的本地规范仓库安装一份完整规范快照。替换占位符后执行：
 
 ```text
-python <已安装Skill>/scripts/standards_store.py install --repo <规范仓库目录> --ref v2.4.0
+python <已安装Skill>/scripts/standards_store.py install --repo <规范仓库目录> --ref v2.5.0
 python <已安装Skill>/scripts/standards_store.py list
 ```
 
